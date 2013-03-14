@@ -41,7 +41,7 @@
    		//String servicePoint = ParseJSONSolrLocationField.getWmsUrl(layerInfoMap.get(layerIds[0]).get("Location"));
    		//String serverName = servicePoint.substring(0, servicePoint.indexOf("/wms"));
    		
-   		String serverName = "http://linuxdev.lib.berkeley.edu:8080/geoserver";
+   		String serverName = "http://gs-gis.lib.berkeley.edu:8080/geoserver";
    		String servicePoint = serverName + "/wms";
    		String featureTypeInfo = "";
    		System.out.println(serverName);
