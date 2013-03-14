@@ -37,7 +37,7 @@
    		String institution = solrRecords.get(0).getInstitution();
    		//String serverName = ParseJSONSolrLocationField.getWfsUrl(layerInfoMap.get(layerIds[0]).get("Location"));
 
-   		String serverName = "http://geoserver01.uit.tufts.edu";
+   		String serverName = "http://linuxdev.lib.berkeley.edu:8080/geoserver";
    		String servicePoint = serverName + "/wfs";
 		String featureTypeInfo = "";
 

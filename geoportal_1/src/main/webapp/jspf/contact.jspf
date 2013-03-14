@@ -6,12 +6,12 @@
 	<div>
 		<h3>Project Management:</h3>
 		Patrick Florance, Manager of Geospatial Technology Services, UIT, Tufts University
+		<h3>Berkeley Project Management:</h3>
+		Harrison Dekker, Head, Library Data Lab, University of California at Berkeley
 	</div>
 
 	<div id="contactLogos"> 
-		<div class="gisLogo" title="GIS@Tufts" onclick="location.href='http://gis.tufts.edu/'">
-		</div>
-		<div class="itLogo" title="UIT" onclick="location.href='http://uit.tufts.edu/'">
+		<div class="gisLogo" title="GIS@Berkeley" onclick="location.href='http://www.lib.berkeley.edu/'">
 		</div>
 	</div>
 </div>
