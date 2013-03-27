@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 /**
- * This is an abstract class that provides the logic to determine which concrete class 
- * should be selected to download a layer.
+ * class that provides the logic to determine which concrete class 
+ * should be selected to download a layer, determines user auth
  * 
  * 
  * @author Chris Barnett
@@ -53,7 +53,7 @@ public class DownloadHandlerImpl implements DownloadHandler, BeanFactoryAware {
 	 * a method to set the locallyAuthenticated property.  
 	 * 
 	 * This is a way to pass information about the user's session into the java class.  If the user has 
-	 * authenticated locally, a session variable is set.  The calling code should set this value.
+	 * authenticated locally, an argument is passed from a controller.  The calling code should set this value.
 	 * 
 	 * @param authenticated  true if the user has authenticated locally, otherwise false
 	 */
@@ -101,12 +101,39 @@ public class DownloadHandlerImpl implements DownloadHandler, BeanFactoryAware {
 		return requestId;
 	}
 
+	private Boolean isAuthorizedToDownload(SolrRecord solrRecord){
+		if (solrRecord.getAccess().equalsIgnoreCase("public")){
+			return true;
+		} else {
+			try {
+				if (solrRecord.getInstitution().equalsIgnoreCase(searchConfigRetriever.getHome())){
+					//check if the user is locally authenticated
+					if (this.getLocallyAuthenticated()){
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage());
+				return false;
+			}
+		}
+	}
+	
 	private Map <String, List<LayerRequest>> createDownloadRequestMap (Map<String, String> layerMap, String[] bounds) throws Exception {
 		this.layerInfo = this.layerInfoRetriever.fetchAllLayerInfo(layerMap.keySet());
 		Map <String, List<LayerRequest>> downloadMap = new HashMap<String, List<LayerRequest>>(); 
 		for (SolrRecord record: this.layerInfo){
 			logger.debug("Requested format: " + layerMap.get(record.getLayerId()));
 			LayerRequest layerRequest = this.createLayerRequest(record, layerMap.get(record.getLayerId()), bounds);
+			if (!isAuthorizedToDownload(record)){
+				layerRequest.setStatus(Status.FAILED);
+				logger.info("User is not authorized to download: '" + record.getLayerId() +"'");
+				continue;	
+			}
 			String currentClassKey = null;
 			try {
 				currentClassKey = this.downloadConfigRetriever.getClassKey(layerRequest);
