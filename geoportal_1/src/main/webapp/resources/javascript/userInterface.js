@@ -367,6 +367,9 @@ org.OpenGeoPortal.UserInterface = function(){
 
 			analytics.track("Results Pagination", direction + " Results Page");
 		});
+		
+		jQuery("#main").fadeTo('fast', 1);
+
 		/*jQuery(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
 			console.log(ajaxSettings);
 
