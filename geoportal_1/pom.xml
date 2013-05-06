@@ -4,7 +4,7 @@
   <groupId>org.OpenGeoPortal</groupId>
   <artifactId>geoportal</artifactId>
   <packaging>war</packaging>
-  <version>1.2.RC1</version>
+  <version>1.2.RELEASE</version>
   <name>opengeoportal webapp</name>
   <url>http://opengeoportal.org</url>
 	<!-- this is the project's initial pom file and there are, no doubt, many 
@@ -230,6 +230,12 @@
 		  	<groupId>com.thetransactioncompany</groupId>
 		  	<artifactId>cors-filter</artifactId>
 		  	<version>1.6</version>
+		  	</dependency>
+		  <dependency>
+		  	<groupId>javax.servlet</groupId>
+		  	<artifactId>servlet-api</artifactId>
+		  	<version>2.5</version>
+		  	<scope>provided</scope>
 		  </dependency>
 	</dependencies>
 	<build>
@@ -248,6 +254,15 @@
           </execution>
         </executions>
         </plugin>
+        <plugin>
+    		<groupId>org.apache.maven.plugins</groupId>
+    		<artifactId>maven-compiler-plugin</artifactId>
+    		<version>3.0</version>
+    		<configuration>
+        		<source>1.5</source>
+        		<target>1.5</target>
+    		</configuration>
+	</plugin>
 		</plugins>
 	</build>
 </project>
