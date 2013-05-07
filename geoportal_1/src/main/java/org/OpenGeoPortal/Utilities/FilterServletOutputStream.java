@@ -14,6 +14,7 @@ public class FilterServletOutputStream extends ServletOutputStream {
 		stream = new DataOutputStream(output);
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		stream.write(b);
 	}

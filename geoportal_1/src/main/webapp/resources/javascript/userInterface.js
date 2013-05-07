@@ -107,7 +107,7 @@ org.OpenGeoPortal.UserInterface = function(){
 		//info dialogs
 		
 		//temporary notice
-		var mapitDiv = '<div id="mapitNotice" class="dialog infoDialog"><p>Map It functionality to export your maps directly into GeoCommons is coming soon.</p></div>';
+		/*var mapitDiv = '<div id="mapitNotice" class="dialog infoDialog"><p>Map It functionality to export your maps directly into GeoCommons is coming soon.</p></div>';
 		jQuery("body").append(mapitDiv);
 		jQuery('#mapitNotice').dialog({
     		zIndex: 2999,
@@ -115,7 +115,7 @@ org.OpenGeoPortal.UserInterface = function(){
     		resizable: false,
     		minWidth: 415,
     		autoOpen: false		
-		});
+		});*/
 		
 		jQuery('#highlights').dialog({
     		zIndex: 2999,
@@ -352,6 +352,7 @@ org.OpenGeoPortal.UserInterface = function(){
 		jQuery("#headerLogin").click(function(event){that.promptLogin(event);});
 
 		jQuery(document).bind("loginSucceeded", function(){
+			jQuery(document).trigger("loginSuccess.addToCart");
 			that.applyLoginActions();
 			analytics.track("Login", "Login Success");
 		});
@@ -367,6 +368,9 @@ org.OpenGeoPortal.UserInterface = function(){
 
 			analytics.track("Results Pagination", direction + " Results Page");
 		});
+		
+		jQuery("#main").fadeTo('fast', 1);
+
 		/*jQuery(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
 			console.log(ajaxSettings);
 
@@ -396,7 +400,6 @@ org.OpenGeoPortal.UserInterface = function(){
 	};
 	this.init();
 	jQuery("#main").fadeTo('fast', 1);
-
 };
 
 /**
@@ -574,7 +577,7 @@ org.OpenGeoPortal.UserInterface.prototype.createTopicsMenu = function() {
 	                       {"topic":"society", "label":"Cultural, Society, and Demographics"},
 	                       {"topic":"structure", "label":"Facilities and Structure"},
 	                       {"topic":"transportation", "label":"Transportation Networks"},
-	                       {"topic":"utilitiesCommunications", "label":"Utilities and Communication"}
+	                       {"topic":"utilitiesCommunication", "label":"Utilities and Communication"}
 	                       ];
 	var menuHtml = "";
 	for (var topicIndex in topicCategories){
@@ -1502,14 +1505,16 @@ org.OpenGeoPortal.UserInterface.prototype.authenticationWarning = function(check
 	
 	var loginAndAddFunction = function(){
 		that.IgnoreAuthenticationWarning[disposition] = jQuery("#" + ignoreWarningId).is(":checked");
-		that.promptLogin();
-	
+		//that.promptLogin();
+		that.login.loginDialog();
+
 		//pass some info to the loginDialog
 		jQuery(this).dialog('disable');
-		var dialogBox = jQuery(this);
-		jQuery(document).bind("loginSuccess", function(){
+		var dialogBox = jQuery('#' + divId);
+		jQuery(document).bind("loginSuccess.addToCart", function(){
 			that.cartTableObject.addToCart(checkboxObj, rowData);
 			dialogBox.dialog('close');
+			jQuery(document).unbind("loginSuccess.addToCart");
 		});
 		jQuery(document).bind("loginCancel", function(){
 			dialogBox.dialog("enable");
