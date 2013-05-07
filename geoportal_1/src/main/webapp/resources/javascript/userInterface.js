@@ -395,6 +395,8 @@ org.OpenGeoPortal.UserInterface = function(){
 		});*/
 	};
 	this.init();
+	jQuery("#main").fadeTo('fast', 1);
+
 };
 
 /**
