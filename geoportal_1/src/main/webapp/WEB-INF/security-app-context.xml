@@ -17,7 +17,7 @@
 	
 	<security:ldap-server url="${ldap.url}" />
 	<security:authentication-manager alias="authenticationManager" >
-		<security:ldap-authentication-provider user-search-filter="(uid={0})"
+		<security:ldap-authentication-provider user-search-filter="${ldap.userSearchFilter}"
 		user-context-mapper-ref="userDetailsMapper.custom" />
 		<!--<security:authentication-provider>
 			<security:user-service>
