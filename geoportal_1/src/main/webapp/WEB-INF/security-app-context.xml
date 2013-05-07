@@ -15,17 +15,17 @@
 		<security:intercept-url pattern="/**" access="permitAll" />
 	</security:http>
 	
-	<security:ldap-server url="${ldap.url}" />
+	<!--<security:ldap-server url="${ldap.url}" />-->
 	<security:authentication-manager alias="authenticationManager" >
-		<security:ldap-authentication-provider user-search-filter="(uid={0})"
-		user-context-mapper-ref="userDetailsMapper.custom" />
-		<!--<security:authentication-provider>
+		<!--<security:ldap-authentication-provider user-search-filter="(uid={0})"
+		user-context-mapper-ref="userDetailsMapper.custom" />-->
+			<security:authentication-provider>
 			<security:user-service>
-				<security:user name="testAdmin" password="koala"
+				<security:user name="admin" password="pachyderm"
 					authorities="ROLE_ADMIN,ROLE_USER" />
-				<security:user name="testUser" password="wombat"
+				<security:user name="user" password="jumbo"
 					authorities="ROLE_USER" />
 			</security:user-service>
-		</security:authentication-provider>-->
+		</security:authentication-provider>
 	</security:authentication-manager>
 </beans:beans>
