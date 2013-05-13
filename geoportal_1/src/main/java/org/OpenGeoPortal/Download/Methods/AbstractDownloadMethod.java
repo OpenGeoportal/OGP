@@ -51,7 +51,16 @@ public abstract class AbstractDownloadMethod {
 	public Future<File> download(LayerRequest currentLayer) throws Exception {
 		this.currentLayer = currentLayer;
 		currentLayer.setMetadata(this.includesMetadata());
-		InputStream inputStream = this.httpRequester.sendRequest(this.getUrl(), createDownloadRequest(), getMethod());
+		String requestString = "";
+		try {
+			requestString = createDownloadRequest();
+		} catch (Exception e){
+			e.printStackTrace();
+			logger.error("problem creating download request");
+			throw new Exception("Problem creating download request");
+		}
+		InputStream inputStream = this.httpRequester.sendRequest(this.getUrl(), requestString, getMethod());
+		
 		File directory = getDirectory();
 		String contentType = httpRequester.getContentType().toLowerCase();
 		Boolean contentMatch = expectedContentTypeMatched(contentType);
@@ -70,18 +79,6 @@ public abstract class AbstractDownloadMethod {
 		//FileUtils with a BufferedInputStream seems to be the fastest method with a small sample size.  requires more testing
 		InputStream bufferedIn = new BufferedInputStream(inputStream);
 		FileUtils.copyInputStreamToFile(bufferedIn, outputFile);
-		/*try {
-			int currentBytes;
-			while ((currentBytes = bufferedIn.read()) != -1) {
-				outputStream.write(currentBytes);
-			} 
-		} finally {
-			try {
-				bufferedIn.close();
-			} finally {
-				outputStream.close();
-			}
-		}*/
 
 		return new AsyncResult<File>(outputFile);
 	}

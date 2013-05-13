@@ -2270,42 +2270,42 @@ org.OpenGeoPortal.UserInterface.prototype.toggleOutline = function(thisObj, laye
 };
 
 org.OpenGeoPortal.UserInterface.prototype.mouseCursor = function(){
-	var that = this;
-	var layerStateObject = this.layerStateObject;
-	jQuery('.olMap').css('cursor', "-moz-grab");
-	jQuery(document).on('click', 'div.olControlZoomBoxItemInactive', function(){
-		jQuery('.olMap').css('cursor', "-moz-zoom-in");
-		var mapLayers = that.mapObject.layers;
-		for (var i in mapLayers){
-			var currentLayer = mapLayers[i];
-			if (layerStateObject.layerStateDefined(currentLayer.name)){
-				if (layerStateObject.getState(currentLayer.name, "getFeature")){
-					that.mapObject.events.unregister("click", currentLayer, that.mapObject.wmsGetFeature);
-				}
-			} else {
-				continue;
-			}
-		}
-		layerStateObject.resetState('getFeature');
-		jQuery('.attributeInfoControl').attr('src', that.utility.getImage('preview.gif'));
-	});
-	jQuery(document).on('click', '.olControlNavigationItemActive', function(){
+		var that = this;
+		var layerStateObject = this.layerStateObject;
 		jQuery('.olMap').css('cursor', "-moz-grab");
-		//var mapLayers = org.OpenGeoPortal.map.layers;
-		var mapLayers = that.mapObject.layers;
-		for (var i in mapLayers){
-			var currentLayer = mapLayers[i];
-			if (layerStateObject.layerStateDefined(currentLayer.name)){
-				if (layerStateObject.getState(currentLayer.name, "getFeature")){
-					that.mapObject.events.unregister("click", currentLayer, that.mapObject.wmsGetFeature);
+		jQuery(document).bind('zoomBoxActivated', function(){
+			jQuery('.olMap').css('cursor', "-moz-zoom-in");
+			var mapLayers = that.mapObject.layers;
+			for (var i in mapLayers){
+				var currentLayer = mapLayers[i];
+				if (layerStateObject.layerStateDefined(currentLayer.name)){
+					if (layerStateObject.getState(currentLayer.name, "getFeature")){
+						layerStateObject.setState(currentLayer.name, {"getFeature": false});
+					}
+				} else {
+					continue;
 				}
-			} else {
-				continue;
 			}
-		}
-		layerStateObject.resetState('getFeature');
-		jQuery('.attributeInfoControl').attr('src', that.utility.getImage('preview.gif'));
-	});
+			layerStateObject.resetState('getFeature');
+			jQuery('.attributeInfoControl').attr('src', that.utility.getImage('preview.gif'));
+		});
+		
+		jQuery(document).bind('panActivated', function(){
+			jQuery('.olMap').css('cursor', "-moz-grab");
+			var mapLayers = that.mapObject.layers;
+			for (var i in mapLayers){
+				var currentLayer = mapLayers[i];
+				if (layerStateObject.layerStateDefined(currentLayer.name)){
+					if (layerStateObject.getState(currentLayer.name, "getFeature")){
+						layerStateObject.setState(currentLayer.name, {"getFeature": false});
+					}
+				} else {
+					continue;
+				}
+			}
+			layerStateObject.resetState('getFeature');
+			jQuery('.attributeInfoControl').attr('src', that.utility.getImage('preview.gif'));
+		});
 };
 
 org.OpenGeoPortal.UserInterface.prototype.getImage = function(imageName){

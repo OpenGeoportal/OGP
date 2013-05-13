@@ -23,7 +23,6 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 	private static final Boolean INCLUDES_METADATA = true;
 	private HttpRequester httpRequester;
 	private List<LayerRequest> layerList;
-	private LayerRequest currentLayer;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public void setLayerList(List<LayerRequest> layerList){
@@ -82,21 +81,25 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 	
 	@Override
 	@Async
-	public Future<Boolean> sendEmail(LayerRequest currentLayer) throws Exception {
-		this.currentLayer = currentLayer;
+	public Future<Boolean> sendEmail(List<LayerRequest> layerList) throws Exception {
+		this.layerList = layerList;
 		try {
+			logger.info(this.getUrl());
+			logger.info(createDownloadRequest());
 			this.httpRequester.sendRequest(this.getUrl(), createDownloadRequest(), "GET");
 			logger.info("Email request sent.");
 			return new AsyncResult<Boolean>(true);
 		} catch (Exception e){
+			logger.error(e.getMessage());
 			logger.error("Attempt to send email failed.");
+			e.printStackTrace();
 			return new AsyncResult<Boolean>(false);
 		}
 	}
 
 	private String getUrl() {
-		logger.info("Download URL: " + currentLayer.getDownloadUrl());
-		return currentLayer.getDownloadUrl();
+		logger.info("Download URL: " + layerList.get(0).getDownloadUrl());
+		return layerList.get(0).getDownloadUrl();
 	}
 
 }

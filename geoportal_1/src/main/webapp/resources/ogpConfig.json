@@ -1,12 +1,7 @@
 {"config":{"homeInstitution": "Tufts", "institutionSpecificCss": "resources/css/institutionTufts.css", 
         "institutionSpecificJavaScript": "", 
-<<<<<<< HEAD
 	"googleAnalyticsId": "", 
 	"googleAPIKey": "",
-=======
-	"googleAnalyticsId": "UA-19787732-1", 
-	"googleAPIKey": "AIzaSyCuK9otEY-rbMNJEpDO_NzD1jA-OyqubDY",
->>>>>>> refs/remotes/TuftsOGP/master
 	"search":{"serviceType": "solr", "serviceAddress": "http://geodata.tufts.edu/solr/select"}, 
 	"institutions": {"Tufts": {"login": {"loginType": "form", "authenticationPage": "login"}, 
 				"proxy": {"id": "proxy.Restricted.Tufts", "accessLevel": ["restricted"], "wms": "restricted/wms", "wfs": "restricted/wfs"}, 

@@ -17,20 +17,12 @@
 	
 	<!--<security:ldap-server url="${ldap.url}" />-->
 	<security:authentication-manager alias="authenticationManager" >
-<<<<<<< HEAD
 		<!--<security:ldap-authentication-provider user-search-filter="(uid={0})"
 		user-context-mapper-ref="userDetailsMapper.custom" />-->
-			<security:authentication-provider>
-=======
-		<security:ldap-authentication-provider user-search-filter="${ldap.userSearchFilter}"
-		user-context-mapper-ref="userDetailsMapper.custom" />
-		<!--<security:authentication-provider>
->>>>>>> refs/remotes/TuftsOGP/master
+		<security:authentication-provider>
 			<security:user-service>
-				<security:user name="admin" password="pachyderm"
-					authorities="ROLE_ADMIN,ROLE_USER" />
-				<security:user name="user" password="jumbo"
-					authorities="ROLE_USER" />
+				<security:user name="admin" password="pachyderm" authorities="ROLE_ADMIN,ROLE_USER" />
+				<security:user name="user" password="jumbo" authorities="ROLE_USER" />
 			</security:user-service>
 		</security:authentication-provider>
 	</security:authentication-manager>

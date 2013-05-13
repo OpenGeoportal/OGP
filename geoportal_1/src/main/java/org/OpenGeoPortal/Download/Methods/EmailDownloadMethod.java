@@ -1,5 +1,6 @@
 package org.OpenGeoPortal.Download.Methods;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.OpenGeoPortal.Download.Types.LayerRequest;
@@ -10,7 +11,7 @@ public interface EmailDownloadMethod {
 
 	String createDownloadRequest();
 
-	Future<Boolean> sendEmail(LayerRequest currentLayer)
+	Future<Boolean> sendEmail(List<LayerRequest> layerList)
 			throws Exception;
 
 }
