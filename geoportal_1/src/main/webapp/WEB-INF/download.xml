@@ -1,0 +1,12 @@
+<!-- Berkeley -->
+<bean id="layerDownloader.vector.Berkeley" class="org.OpenGeoPortal.Download.UnpackagedLayerDownloader">
+	<property name="downloadMethod" ref="downloadMethod.wfs"/>
+</bean>
+
+<bean id="layerDownloader.kml.Berkeley" class="org.OpenGeoPortal.Download.UnpackagedLayerDownloader">
+	<property name="downloadMethod" ref="downloadMethod.kml"/>
+</bean>
+
+<bean id="layerDownloader.raster.Berkeley" class="org.OpenGeoPortal.Download.UnpackagedLayerDownloader">
+	<property name="downloadMethod" ref="downloadMethod.wcs"/>
+</bean>
