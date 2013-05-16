@@ -2,7 +2,7 @@
         "institutionSpecificJavaScript": "", 
 	"googleAnalyticsId": "UA-3925005-2", 
 	"googleAPIKey": "AIzaSyCuK9otEY-rbMNJEpDO_NzD1jA-OyqubDY",
-	"search":{"serviceType": "solr", "serviceAddress": "http://gis.lib.berkeley.edu:8080/solr/select"}, 
+	"search":{"serviceType": "solr", "serviceAddress": "http://gis.lib.berkeley.edu:8080/solr-temp/select"}, 
 	"institutions": {"Tufts": {"login": {"loginType": "form", "authenticationPage": "login"}, 
 				"proxy": {"id": "proxy.Restricted.Tufts", "accessLevel": ["restricted"], "wms": "restricted/wms", "wfs": "restricted/wfs"}, 
 				"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_tufts.png", "altDisplay": "Tufts", "tooltipText": "Tufts University"}}}, 
