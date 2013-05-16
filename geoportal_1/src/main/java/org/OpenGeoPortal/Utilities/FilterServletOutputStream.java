@@ -14,6 +14,7 @@ public class FilterServletOutputStream extends ServletOutputStream {
 		stream = new DataOutputStream(output);
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		stream.write(b);
 	}
@@ -25,5 +26,6 @@ public class FilterServletOutputStream extends ServletOutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		stream.write(b, off, len);
 	}
+
 }
 

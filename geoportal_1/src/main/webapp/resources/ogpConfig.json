@@ -9,6 +9,6 @@
 	"Harvard":{"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_harvard.png", 
 			"altDisplay": "HGL", "tooltipText": "Harvard Geospatial Library"}}}, 
 	"Berkeley":{"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_berkeley.png", "altDisplay": "Berkeley", "tooltipText": "UC Berkeley"}}}, 
-	"MIT":{"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_mit.png", "altDisplay": "MIT", "tooltipText": "Massachusetts Institute of Technology"}}}, 
+	"MIT":{"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_mit.png", "altDisplay": "MIT", "tooltipText": "Massachusetts Institute of Technology"}}},
 	"MassGIS":{"graphics":{"sourceIcon":{"resourceLocation": "resources/media/src_massgis.png", "altDisplay": "MassGIS", "tooltipText": "MassGIS"}}}
 	}}}

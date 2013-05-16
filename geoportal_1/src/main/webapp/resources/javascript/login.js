@@ -166,8 +166,9 @@ this.getUrl = function(){
 	var url = protocol + "://" + hostname + port + "/" + extraPath;
 	return url;
 };
-// retrieve user entered values, generate https request and set login flag
-// some special processing is included for running on localhost 
+
+//retrieve user entered values, generate https request and set login flag
+//some special processing is included for running on localhost 
 this.processFormLogin = function()
 {
 	var that = this;
@@ -175,13 +176,16 @@ this.processFormLogin = function()
 	//var url = this.authenticationPage;
 	var username = jQuery("#loginFormUsername").val();
 	var password = jQuery("#loginFormPassword").val();
-	var ajaxArgs = {url: url, 
+	var ajaxArgs = {
+			type: "POST",
+			url: url, 
 			context: that,
-			   xhrFields: {
-				     withCredentials: true
-				   },
-			data: {"j_username": username, "j_password": password},
-			dataType: "jsonp",
+			crossDomain: true,
+			xhrFields: {
+				withCredentials: true
+				},
+			data: {"username": username, "password": password},
+			dataType: "json",
 			success: that.loginResponse, 
 			error: that.loginResponseError};
 	jQuery.ajax(ajaxArgs);
