@@ -39,23 +39,20 @@ public class EmailLayerDownloader implements LayerDownloader {
 	@Override
 	public void downloadLayers(UUID requestId, MethodLevelDownloadRequest request) throws Exception {
 		List<LayerRequest> layerList = request.getRequestList();
-		for (LayerRequest currentLayer: layerList){
-			//this.downloadMethod.validate(currentLayer);
 				//check to see if the filename exists
 			//this should fire off a callable that asynchronously calls the download method
+		Future<?> emailFuture = null;
 			try {
 				logger.info("Trying to send email...");
-				currentLayer.setFutureValue(this.emailDownloadMethod.sendEmail(currentLayer));
+				emailFuture = this.emailDownloadMethod.sendEmail(layerList);
+
 			} catch (Exception e){
 				//e.printStackTrace();
-				logger.error("an error downloading this layer: " + currentLayer.getLayerInfo().getName());
-				currentLayer.setStatus(Status.FAILED);
-				continue;
+				logger.error("an error sending email");
 			}
-		} 
+		
 		for (LayerRequest currentLayer: layerList){
-			Future<?> currentFuture = currentLayer.getFutureValue();
-			if ((Boolean) currentFuture.get()){
+			if ((Boolean) emailFuture.get()){
 				currentLayer.setStatus(Status.SUCCESS);
 			} else {
 				currentLayer.setStatus(Status.FAILED);

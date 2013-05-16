@@ -4,7 +4,7 @@
   <groupId>org.OpenGeoPortal</groupId>
   <artifactId>geoportal</artifactId>
   <packaging>war</packaging>
-  <version>1.2.RC1</version>
+  <version>1.2.RELEASE</version>
   <name>opengeoportal webapp</name>
   <url>http://opengeoportal.org</url>
 	<!-- this is the project's initial pom file and there are, no doubt, many 
@@ -22,8 +22,9 @@
 		WEB-INF, one at the top level and one at ROOT/WEB-INF. -->
 	<!-- Shared version number properties -->
 	<properties>
-		<org.springframework.version>3.1.2.RELEASE</org.springframework.version>
-		<jackson.version>2.0.5</jackson.version>
+		<org.springframework.version>3.1.4.RELEASE</org.springframework.version>
+		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
+		<jackson.version>1.9.12</jackson.version>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -56,17 +57,6 @@
 		<!-- Application Context (depends on spring-core, spring-expression, spring-aop, 
 			spring-beans) This is the central artifact for Spring's Dependency Injection 
 			Container and is generally always defined -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${org.springframework.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- Various Application Context utilities, including EhCache, JavaMail, 
 			Quartz, and Freemarker integration Define this if you need any of these integrations -->
@@ -106,6 +96,12 @@
 			<version>${org.springframework.version}</version>
 		</dependency>
 
+		  <dependency>
+		  	<groupId>org.springframework</groupId>
+		  	<artifactId>spring-context</artifactId>
+		  	<version>${org.springframework.version}</version>
+		  </dependency>
+		  
 		<!-- Spring MVC for Servlet Environments (depends on spring-core, spring-beans, 
 			spring-context, spring-web) Define this if you use Spring MVC with a Servlet 
 			Container such as Apache Tomcat (org.springframework.web.servlet.*) -->
@@ -194,32 +190,32 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>3.1.2.RELEASE</version>
+			<version>${org.springframework.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>3.1.2.RELEASE</version>
+			<version>${org.springframework.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>3.1.2.RELEASE</version>
+			<version>${org.springframework.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-ldap</artifactId>
-			<version>3.1.2.RELEASE</version>
+			<version>${org.springframework.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-lgpl</artifactId>
-			<version>1.9.9</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-lgpl</artifactId>
-			<version>1.9.9</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		  <dependency>
         	<groupId>org.apache.commons</groupId>
@@ -233,9 +229,14 @@
 		  </dependency>
 		  <dependency>
 		  	<groupId>javax.servlet</groupId>
-		  	<artifactId>javax.servlet-api</artifactId>
-		  	<version>3.1-b02</version>
+		  	<artifactId>servlet-api</artifactId>
+		  	<version>2.5</version>
 		  	<scope>provided</scope>
+		  </dependency>
+		  <dependency>
+		  	<groupId>com.thetransactioncompany</groupId>
+		  	<artifactId>cors-filter</artifactId>
+		  	<version>1.6</version>
 		  </dependency>
 	</dependencies>
 	<build>
@@ -254,13 +255,13 @@
           </execution>
         </executions>
         </plugin>
-        <plugin>
+                <plugin>
     		<groupId>org.apache.maven.plugins</groupId>
     		<artifactId>maven-compiler-plugin</artifactId>
     		<version>3.0</version>
     		<configuration>
-        		<source>1.5</source>
-        		<target>1.5</target>
+        		<source>1.6</source>
+        		<target>1.6</target>
     		</configuration>
 	</plugin>
 		</plugins>

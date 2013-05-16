@@ -28,6 +28,8 @@ public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 	public Set<String> getExpectedContentType(){
 		Set<String> expectedContentType = new HashSet<String>();
 		expectedContentType.add("application/zip");
+		expectedContentType.add("image/tiff");
+		expectedContentType.add("image/tiff; subtype=\"geotiff\"");
 		return expectedContentType;
 	}
 	
@@ -111,19 +113,14 @@ public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 			Element rootElement = requestXML.createElement("DescribeFeatureType");
 			requestXML.appendChild(rootElement);*/
 			String layerName = this.currentLayer.getLayerNameNS();
-			 String describeCoverageRequest = "<DescribeCoverage"
-				 + " version=\"1.0.0\""
-				 + " service=\"WCS\""
-				 + " xmlns=\"http://www.opengis.net/wcs\""
-				 + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-				 + " xsi:schemaLocation=\"http://www.opengis.net/wcs http://schemas.opengis.net/wcs/1.0.0/describeCoverage.xsd\">"
-				 +   "<Coverage>" + layerName + "</Coverage>"  
-				 + "</DescribeCoverage>";
-
-			InputStream inputStream = this.httpRequester.sendRequest(this.getUrl(), describeCoverageRequest, "POST");
+			
+			String describeCoverageRequest = "version=1.0.0&REQUEST=DescribeCoverage&Identifiers=" + layerName;
+			InputStream inputStream = this.httpRequester.sendRequest(this.getUrl(), describeCoverageRequest, "GET");
 			//parse the returned XML and return needed info as a map
 			// Create a factory
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setValidating(false);  // dtd isn't available; would be nice to attempt to validate
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			// Use document builder factory
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			//Parse the document
@@ -148,10 +145,19 @@ public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 				//NodeList supportedCRSs = document.getElementsByTagName("wcs:supportedCRS");
 				NodeList supportedCRSs = document.getElementsByTagName("wcs:requestResponseCRSs");
 				describeLayerInfo.put("SRS", supportedCRSs.item(0).getTextContent().trim());
+			} catch (Exception e){
+				throw new Exception("error getting SRS info: "+ e.getMessage());
+	
+			}
+			try {
 				NodeList gridEnvelopeLow = document.getElementsByTagName("gml:low");
 				describeLayerInfo.put("gridEnvelopeLow", gridEnvelopeLow.item(0).getTextContent().trim());
 				NodeList gridEnvelopeHigh = document.getElementsByTagName("gml:high");
 				describeLayerInfo.put("gridEnvelopeHigh", gridEnvelopeHigh.item(0).getTextContent().trim());
+			} catch (Exception e){
+				throw new Exception("error getting Grid Envelope info: "+ e.getMessage());
+			}
+			try{
 				NodeList axes = document.getElementsByTagName("gml:axisName");
 				axes.getLength();
 				for (int i = 0; i < axes.getLength(); i++){
@@ -161,7 +167,7 @@ public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 				//NodeList supportedFormats = document.getElementsByTagName("wcs:supportedCRS");
 				//describeLayerInfo.put("nativeFormat", supportedFormats.item(0).getTextContent().trim());
 			} catch (Exception e){
-				throw new Exception("error getting layer info: "+ e.getMessage());
+				throw new Exception("error getting Axis info: "+ e.getMessage());
 			}
 			return describeLayerInfo;
 	 }
