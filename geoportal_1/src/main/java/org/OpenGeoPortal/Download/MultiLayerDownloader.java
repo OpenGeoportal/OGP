@@ -24,7 +24,6 @@ import org.springframework.scheduling.annotation.Async;
 //and take care of layer status as much as possible
 public class MultiLayerDownloader implements LayerDownloader {
 	private MultiLayerDownloadMethod multiLayerDownloadMethod;
-	private RequestStatusManager requestStatusManager;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private List<Future<File>> downloadFutures = new ArrayList<Future<File>>();
 
@@ -51,18 +50,6 @@ public class MultiLayerDownloader implements LayerDownloader {
 			downloadedLayers.add(currentFuture.get());
 		}
 	}
-
-
-
-	public RequestStatusManager getRequestStatusManager() {
-		return requestStatusManager;
-	}
-
-	public void setRequestStatusManager(RequestStatusManager requestStatusManager) {
-		this.requestStatusManager = requestStatusManager;
-	}
-
-
 
 	public MultiLayerDownloadMethod getMultiLayerDownloadMethod() {
 		return multiLayerDownloadMethod;

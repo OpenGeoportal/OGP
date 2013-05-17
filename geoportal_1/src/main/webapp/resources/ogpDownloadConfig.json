@@ -16,4 +16,4 @@
 			{"classKey": "layerDownloader.wcs", "accessLevel":["public","restricted"],"dataType":["raster", "paper map"],"outputFormats":["geotiff"]}], 
 		"MassGIS":[{"classKey": "layerDownloader.kml", "accessLevel":["public"],"dataType":["vector", "raster"], "outputFormats":["kml", "kmz"]},                  
 			{"classKey": "layerDownloader.wfs", "accessLevel":["public","restricted"],"dataType":["vector"],"outputFormats":["shp"]},
-			{"classKey": "layerDownloader.wcs", "accessLevel":["public","restricted"],"dataType":["raster", "paper map"],"outputFormats":["geotiff"]}]}}} 
+			{"classKey": "layerDownloader.wms", "accessLevel":["public","restricted"],"dataType":["raster", "paper map"],"outputFormats":["geotiff"]}]}}} 

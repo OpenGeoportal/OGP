@@ -34,7 +34,7 @@ public class OgpFileUtils {
 	 */
 	public static File createNewFileFromDownload(String fileName, String mimeType, File directory) throws IOException{
 		fileName = OgpFileUtils.filterName(fileName);
-		String responseContentType = mimeType;
+		String responseContentType = mimeType.toLowerCase();
 		logger.info("response MIME-Type: " + responseContentType);
 		//get info from RequestedLayer object
 		if (responseContentType.indexOf(";") > -1){
@@ -47,7 +47,7 @@ public class OgpFileUtils {
 			fileExtension = ".html";
 		} else if (responseContentType.contains("application/zip")){
 			fileExtension = ".zip";
-		} else if (responseContentType.contains("image/tiff")){ 
+		} else if (responseContentType.contains("tiff")||responseContentType.contains("geotiff")){ 
 			fileExtension = ".tif";
 		} else if (responseContentType.contains("image/jpeg")){ 
 			fileExtension = ".jpg";

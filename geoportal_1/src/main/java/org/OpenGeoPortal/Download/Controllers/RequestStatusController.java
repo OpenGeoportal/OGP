@@ -90,6 +90,9 @@ public class RequestStatusController {
 			UUID requestId = downloadRequest.getRequestId();
 			logger.debug("RequestId: " + requestId.toString());
 			String type = "layer";
+			if (downloadRequest.getEmailSent()){
+				type = "email";
+			}
 			StatusSummary status = downloadRequest.getStatusSummary();
 			logger.debug("Download status summary: " + status.toString());
 			requestStatus.addRequestStatusElement(requestId, type, status);

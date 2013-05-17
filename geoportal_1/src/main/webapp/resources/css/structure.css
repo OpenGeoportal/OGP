@@ -813,6 +813,12 @@ div.colorCell:hover {
 	/*word-wrap: break-word;*/
 }
 
+#downloadEmailSent {
+	min-height: 20px;
+	height: 20px;
+	padding: 20px;
+}
+
 .dialog {
 	text-align: left;
 	cursor: default;

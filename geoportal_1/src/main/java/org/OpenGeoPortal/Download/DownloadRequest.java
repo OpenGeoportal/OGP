@@ -17,7 +17,8 @@ public class DownloadRequest {
 	private String sessionId;
 	private File downloadPackage;
 	private List<MethodLevelDownloadRequest> requestList = new ArrayList<MethodLevelDownloadRequest>();
-	private Boolean downloadPackageSet = false;;
+	private Boolean downloadPackageSet = false;
+	private Boolean emailSent = false;
 	
 	public UUID getRequestId() {
 		return requestId;
@@ -56,9 +57,10 @@ public class DownloadRequest {
 			} else {
 				return false;
 			}
-		} else {
-			return false;
+		} else if (emailSent){
+			return true;
 		}
+		return false;
 	}
 	
 	public Boolean isReadyForPackaging(){
@@ -108,5 +110,11 @@ public class DownloadRequest {
 			}
 		}
 		return completionStatus;
+	}
+	public Boolean getEmailSent() {
+		return emailSent;
+	}
+	public void setEmailSent(Boolean emailSent) {
+		this.emailSent = emailSent;
 	}
 }

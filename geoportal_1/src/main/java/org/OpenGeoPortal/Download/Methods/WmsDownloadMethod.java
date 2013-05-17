@@ -35,6 +35,9 @@ public class WmsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 		expectedContentType.add("application/vnd.google-earth.kml+xml");
 		expectedContentType.add("application/vnd.google-earth.kmz");
 		expectedContentType.add("image/geotiff");
+		expectedContentType.add("image/tiff");
+		expectedContentType.add("image/tiff; subtype=\"geotiff\"");
+
 		return expectedContentType;
 	}
 	

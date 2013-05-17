@@ -176,4 +176,5 @@ public class LayerRequest {
 	public void setFutureValue(Future<?> futureValue) {
 		this.futureValue = futureValue;
 	}
+
 }

@@ -55,6 +55,7 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 		}
 	}
 	
+	
 	@Override
 	public String createDownloadRequest() {
 		LayerRequest representativeLayer = this.layerList.get(0);
@@ -81,13 +82,14 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 	
 	@Override
 	@Async
-	public Future<Boolean> sendEmail(List<LayerRequest> layerList) throws Exception {
+	public Future<Boolean> sendEmail(List<LayerRequest> layerList) {
 		this.layerList = layerList;
 		try {
 			logger.info(this.getUrl());
-			logger.info(createDownloadRequest());
+			//logger.info(createDownloadRequest());
 			this.httpRequester.sendRequest(this.getUrl(), createDownloadRequest(), "GET");
 			logger.info("Email request sent.");
+			this.setAllLayerStatus(Status.SUCCESS);
 			return new AsyncResult<Boolean>(true);
 		} catch (Exception e){
 			logger.error(e.getMessage());
