@@ -30,6 +30,7 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
+import org.codehaus.jackson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -317,7 +318,7 @@ public class GeoCommonsJsonClient implements GeoCommonsClient {
 		  return out.toString();
 		}
 
-		private CreateStreamDataSetRequestJson createStreamDataSetRequestObject(String layerId) {
+		private CreateStreamDataSetRequestJson createStreamDataSetRequestObject(String layerId) throws JsonParseException {
 	    	CreateStreamDataSetRequestJson createDataSetRequestJson = new CreateStreamDataSetRequestJson();
 	    	Metadata layerInfo;
 			try {

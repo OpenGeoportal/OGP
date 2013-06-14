@@ -64,4 +64,10 @@ public class EmailLayerDownloader implements LayerDownloader {
 		}
 	}
 
+
+	@Override
+	public Boolean hasRequiredInfo(LayerRequest layer) {
+		return this.emailDownloadMethod.hasRequiredInfo(layer);
+	}
+
 }

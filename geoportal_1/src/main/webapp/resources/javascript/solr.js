@@ -176,37 +176,23 @@ org.OpenGeoPortal.Solr.prototype.SortAcending = "asc";
 org.OpenGeoPortal.Solr.prototype.SortDecending = "desc";
 
 /*Boosts*/
-org.OpenGeoPortal.Solr.prototype.LayerWithinMap = {term: "LayerWithinMap", hasBoost: true, boost: "10.0", hasCap: false};
-org.OpenGeoPortal.Solr.prototype.LayerMatchesScale = {term: "LayerMatchesScale", hasBoost: true, boost: "4.0", hasCap: false};
-org.OpenGeoPortal.Solr.prototype.LayerMatchesCenter = {term: "LayerMatchesCenter", hasBoost: true, boost: "3.0", hasCap: false};
+org.OpenGeoPortal.Solr.prototype.LayerWithinMap = {term: "LayerWithinMap", hasBoost: true, boost: "9.0", hasCap: false};
+org.OpenGeoPortal.Solr.prototype.LayerMatchesScale = {term: "LayerMatchesScale", hasBoost: true, boost: "3.0", hasCap: false};
+org.OpenGeoPortal.Solr.prototype.LayerMatchesCenter = {term: "LayerMatchesCenter", hasBoost: true, boost: "2.0", hasCap: false};
 org.OpenGeoPortal.Solr.prototype.LayerIntersectionScale = {term: "LayerIntersectionScale", hasBoost: true, boost: "2.0", hasCap: false};
-org.OpenGeoPortal.Solr.prototype.LayerAreaIntersection = {term: "LayerAreaIntersection", hasBoost: true, boost: "4.0", hasCap: false};
-
-
-/*org.OpenGeoPortal.Solr.prototype.LayerDisplayNameBoost = "5.0";
-org.OpenGeoPortal.Solr.prototype.LayerThemeKeywordsBoost = "2.0";
-org.OpenGeoPortal.Solr.prototype.LayerTopicBoost = "4.0";
-
-org.OpenGeoPortal.Solr.prototype.LayerPlaceKeywordsBoost = "2.0";
-org.OpenGeoPortal.Solr.prototype.LayerPublisherBoost = "1.0";
-org.OpenGeoPortal.Solr.prototype.LayerOriginatorBoost = "1.0";
-
-org.OpenGeoPortal.Solr.prototype.LayerThemeSynonymKeywordBoost = "1.0";
-org.OpenGeoPortal.Solr.prototype.LayerThemeSynonymKeywordCap = "0.5";
-
-org.OpenGeoPortal.Solr.prototype.LayerDisplayNameSynonymKeywordBoost = "1.0";
-org.OpenGeoPortal.Solr.prototype.LayerDisplayNameSynonymKeywordCap = "0.5";
-*/
+org.OpenGeoPortal.Solr.prototype.LayerAreaIntersection = {term: "LayerAreaIntersection", hasBoost: true, boost: "3.0", hasCap: false};
 
 /*defaults */
 org.OpenGeoPortal.Solr.prototype.BasicKeywordString = null;
 
-org.OpenGeoPortal.Solr.prototype.LayerDisplayNameTerm = {term: "LayerDisplayNameSynonyms", hasBoost: true, boost: "5.0", hasCap: true, cap: "0.5"};
-org.OpenGeoPortal.Solr.prototype.ThemeKeywordsTerm = {term: "ThemeKeywordsSynonymsLcsh", hasBoost: true, boost: "1.0", hasCap: true, cap: "0.5"};
-org.OpenGeoPortal.Solr.prototype.PlaceKeywordsTerm = {term: "PlaceKeywordsSynonyms", hasBoost: true, boost: "2.0", hasCap: false};
+org.OpenGeoPortal.Solr.prototype.LayerDisplayNameTerm = {term: "LayerDisplayNameSynonyms", baseTerm:"LayerDisplayName", hasBoost: true, boost: "5.0", hasCap: true, cap: "0.5"};
+org.OpenGeoPortal.Solr.prototype.ThemeKeywordsTerm = {term: "ThemeKeywordsSynonymsLcsh", baseTerm: "ThemeKeywords", hasBoost: true, boost: "1.0", hasCap: true, cap: "0.5"};
+org.OpenGeoPortal.Solr.prototype.PlaceKeywordsTerm = {term: "PlaceKeywordsSynonyms", baseTerm: "PlaceKeywords", hasBoost: true, boost: "2.0", hasCap: false};
 org.OpenGeoPortal.Solr.prototype.PublisherTerm = {term: "Publisher", hasBoost: true, boost: "1.0", hasCap: false};
 org.OpenGeoPortal.Solr.prototype.OriginatorTerm = {term: "Originator", hasBoost: true, boost: "1.0", hasCap: false};
 org.OpenGeoPortal.Solr.prototype.IsoTopicTerm = {term: "ThemeKeywordsSynonymsIso", hasBoost: true, boost: "4.0", hasCap: false};
+
+org.OpenGeoPortal.Solr.prototype.GenericPhraseBoost = "9.0";
 
 
 org.OpenGeoPortal.Solr.prototype.BasicKeywordTerms = [org.OpenGeoPortal.Solr.prototype.LayerDisplayNameTerm,
@@ -251,19 +237,27 @@ org.OpenGeoPortal.Solr.prototype.DataType = {Raster: "Raster", PaperMap: "Paper+
 //examine a field for quotes and parse them correctly
 org.OpenGeoPortal.Solr.prototype.tokenize = function tokenize(searchTerms)
 {
+	//we're using the pf param instead for phrase matching
+	/*console.log(searchTerms);
 	var arrMatch = searchTerms.match(/["]/g);
 	if (arrMatch != null){
 		if (arrMatch.length > 1){
-			return searchTerms.match(/\w+|"(?:\\"|[^"])+"/g);
+			var searchString = searchTerms.match(/\w+|"(?:\\"|[^"])+"/g);
+			console.log(searchString);
+			return searchString;
 		}
 	} else {
 		arrMatch = searchTerms.match(/[']/g);
 		if (arrMatch != null){
 			if (arrMatch.length > 1){
-				return searchTerms.match(/\w+|'(?:\\'|[^'])+'/g);
+				var searchString =  searchTerms.match(/\w+|'(?:\\'|[^'])+'/g);
+				console.log(searchString);
+				return searchString;
 			}
 		} 
-	}
+	}*/
+	searchTerms = searchTerms.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
+
 	return searchTerms.split(" ");
 
 };
@@ -272,13 +266,20 @@ org.OpenGeoPortal.Solr.prototype.tokenize = function tokenize(searchTerms)
 
 org.OpenGeoPortal.Solr.prototype.escapeSolrValue = function escapeSolrValue(solrValue)
 {
-
+	solrValue = this.filterCharacters(solrValue);
     solrValue = solrValue.replace(/{/g, "\\{").replace(/}/g, "\\}").replace(/\[/g, "\\[").replace(/]/g, "\\]")
     	.replace(/!/g, "\\!").replace(/[+]/g, "\\+").replace(/&/g, "\\&").replace(/~/g, "\\~").replace(/[(]/g, "\\(")
     	.replace(/[)]/g, "\\)").replace(/-/g, "\\-").replace(/\^/g, "\\^");
 
     return solrValue;
 };
+
+//filter out characters that cause problems for solr
+org.OpenGeoPortal.Solr.prototype.filterCharacters = function filterCharacters(solrValue){
+	solrValue = solrValue.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'');
+	return solrValue;
+};
+
 
 //a private function used to create filters
 org.OpenGeoPortal.Solr.prototype.getFilter = function getFilter(columnName, values)
@@ -296,6 +297,7 @@ org.OpenGeoPortal.Solr.prototype.getFilter = function getFilter(columnName, valu
 		temp += columnName + ":" + value;
 	}
 	var filter = "fq=" + escape(temp);
+	//filter += "&pf=" + escape(columnName + ":" + values.join(" ")) + "^" + this.GenericPhraseBoost;
 	return filter;
 	
 };
@@ -332,24 +334,21 @@ org.OpenGeoPortal.Solr.prototype.getSpatialQuery = function getSpatialQuery() {
 				"," + this.layerMatchesArea(this.MinX, this.MaxX, this.MinY, this.MaxY) + 
 				"," + this.layerNearCenterLongitude(this.MinX, this.MaxX) + 
 				"," + this.layerAreaIntersectionScore(this.MinX, this.MaxX, this.MinY, this.MaxY) +
-				"," + this.layerNearCenterLatitude(this.MinY, this.MaxY) + ")";
+				"," + this.layerNearCenterLatitude(this.MinY, this.MaxY) + 
+				")";
 
-
+	//return "";
 	return spatialQuery;
 };
 
-//return a Solr filter that filters out layers that do not intersect the passed bounding box
-//it uses frange with a lower and upper bound
-org.OpenGeoPortal.Solr.prototype.getLayerIntersectsMapFilter = function getLayerIntersectsMapFilter() //mapMinX, mapMaxX, mapMinY, mapMaxY)
-{
-	var intersectionScore = this.layerIntersectsMapAux(this.MinX, this.MaxX, this.MinY, this.MaxY); 
-	var intersectionFilter = "fq={!frange+l%3D1+u%3D10}" + intersectionScore;
-	return intersectionFilter;
-};
-
-
 org.OpenGeoPortal.Solr.prototype.setBoundingBox = function setBoundingBox(minX, maxX, minY, maxY)
 {
+	/*
+	 * 	mapMinX = Math.max(mapMinX, -180);
+	mapMinY = Math.max(mapMinY, -90);
+	mapMaxX = Math.min(mapMaxX, 180);
+	mapMaxY = Math.min(mapMaxY, 90);
+	 */
 	if (minX < -180){
 		minX = -180;
 	}
@@ -396,6 +395,7 @@ org.OpenGeoPortal.Solr.prototype.layerWithinMap = function layerWithinMap(mapMin
 	layerWithinMap += "map(MinY," + mapMinY + "," + mapMaxY + ",1,0),";
 	layerWithinMap += "map(MaxY," + mapMinY + "," + mapMaxY + ",1,0))";
 	layerWithinMap += ",4,4,1,0))";
+	
 	return layerWithinMap;
 };
 
@@ -412,6 +412,8 @@ org.OpenGeoPortal.Solr.prototype.layerMatchesArea = function layerMatchesArea(ma
 	var mapArea = (mapDeltaX * mapDeltaY);
 	var layerMatchesArea = "product(" + this.LayerMatchesScale.boost 
 				+ ",recip(sum(abs(sub(Area," + mapArea + ")),.01),1,1000,1000))";
+	//				+ ",recip(val,1,1000,1000))";
+
 	//var layerMatchesArea = "_val_:\"" + layerMatchesArea + "\"";
 
 	return layerMatchesArea;
@@ -426,37 +428,66 @@ org.OpenGeoPortal.Solr.prototype.layerMatchesArea = function layerMatchesArea(ma
  *  each point in the grid is weighted evenly 
  *    (distance from center of map to center of layer is provided by another clause)
  */
+org.OpenGeoPortal.Solr.prototype.layerAreaIntersectionStepSize = 3;
 org.OpenGeoPortal.Solr.prototype.layerAreaIntersectionScore = function (mapMinX, mapMaxX, mapMinY, mapMaxY)
-{
-	var stepCount = 3;  // use 3x3 grid
+{	
+	var stepCount = this.layerAreaIntersectionStepSize;  // use 3x3 grid
 	var mapDeltaX = Math.abs(mapMaxX - mapMinX);
 	var mapXStepSize = mapDeltaX / (stepCount + 1.);
+
 	var mapDeltaY = Math.abs(mapMaxY - mapMinY);
 	var mapYStepSize = mapDeltaY / (stepCount + 1.);
+
 	var clause = "sum(";  // add up all the map points within the layer
-	for (var i = 0 ; i < stepCount  ; i++)
-	    for (var j = 0 ; j < stepCount ; j++)
-	    {
-		var currentMapX = mapMinX + ((i + 1) * mapXStepSize);
-		var currentMapY = mapMinY + ((j + 1) * mapYStepSize);
+	for (var i = 0 ; i < stepCount  ; i++) {
 
-		// is the current map point in the layer
-		// that is, is currentMapX between MinX and MaxX and is currentMapY betweeen MinY and MaxY
+		for (var j = 0 ; j < stepCount ; j++){
 
-		var thisPointWithin = "map(sum(map(sub(" + currentMapX + ",MinX),0,400,1,0),";
-		thisPointWithin += "map(sub("+ currentMapX + ",MaxX),-400,0,1,0),";
-		thisPointWithin += "map(sub(" + currentMapY + ",MinY),0,400,1,0),";
-		thisPointWithin += "map(sub(" + currentMapY + ",MaxY),-400,0,1,0)),";
-		thisPointWithin += "4,4,1,0)";  // final map values
+			var currentMapX = mapMinX + ((i + 1) * mapXStepSize);
+			var currentMapY = mapMinY + ((j + 1) * mapYStepSize);
 
-		// note that map(" + currentMapX + ",MinX,MaxX,1,0) doesn't work 
-		//  because the min,max,target in map must be constants, not field values
-		//  so we do many sub based comparisons
-	
-		if ((i > 0) || (j > 0))
-		    clause += ",";  // comma separate point checks
-		clause += thisPointWithin;
-	    }
+			//console.log([currentMapX, currentMapY]);
+			// is the current map point in the layer
+			// that is, is currentMapX between MinX and MaxX and is currentMapY betweeen MinY and MaxY
+
+			//why 400?
+			var thisPointWithin = "map(sum(map(sub(" + currentMapX + ",MinX),0,400,1,0),";
+			thisPointWithin += "map(sub("+ currentMapX + ",MaxX),-400,0,1,0),";
+			thisPointWithin += "map(sub(" + currentMapY + ",MinY),0,400,1,0),";
+			thisPointWithin += "map(sub(" + currentMapY + ",MaxY),-400,0,1,0)),";
+			thisPointWithin += "4,4,1,0)";  // final map values
+			
+			/*var thisPointWithin = "map(sum(";
+
+			thisPointWithin += "map(";
+				thisPointWithin += "sub(" + currentMapX + ",MinX)";
+			thisPointWithin += ",0," + parseInt(mapXStepSize) + ",1,0),"
+				
+			thisPointWithin += "map(";
+				thisPointWithin += "sub(" + currentMapX + ",MaxX)";
+			thisPointWithin += ",-" + parseInt(mapXStepSize) + ",0,1,0),";
+				
+			thisPointWithin += "map(";
+				thisPointWithin += "sub(" + currentMapY + ",MinY)";
+			thisPointWithin += ",0," + parseInt(mapYStepSize) + ",1,0),";
+			
+			thisPointWithin += "map(";
+				thisPointWithin += "sub(" + currentMapY + ",MaxY)";
+			thisPointWithin += ",-" + parseInt(mapYStepSize) + ",0,1,0),"
+				
+			thisPointWithin += "),4,4,1,0)";*/
+
+			// note that map(" + currentMapX + ",MinX,MaxX,1,0) doesn't work 
+			//  because the min,max,target in map must be constants, not field values
+			//  so we do many sub based comparisons
+
+			if ((i > 0) || (j > 0)){
+				clause += ",";  // comma separate point checks
+			}
+
+			clause += thisPointWithin;
+		}
+	}
 	clause += ")";
 
 	// clause has the sum of 9 point checks, this could be 9,6,4,3,2,1 or 0
@@ -464,7 +495,8 @@ org.OpenGeoPortal.Solr.prototype.layerAreaIntersectionScore = function (mapMinX,
 
 	clause = "product(" + clause + "," + (1.0 / (stepCount * stepCount)) + ")";
 	clause = "product(" + clause + "," + this.LayerAreaIntersection.boost + ")";
-	tempClause = clause;  // set global for debugging
+	//tempClause = clause;  // set global for debugging
+	//console.log(clause);
 	return clause;
 };
 
@@ -495,6 +527,16 @@ org.OpenGeoPortal.Solr.prototype.layerNearCenterLongitude = function layerNearCe
     return layerMatchesCenter;	
 };
 
+//return a Solr filter that filters out layers that do not intersect the passed bounding box
+//it uses frange with a lower and upper bound
+org.OpenGeoPortal.Solr.prototype.getLayerIntersectsMapFilter = function getLayerIntersectsMapFilter() //mapMinX, mapMaxX, mapMinY, mapMaxY)
+{
+	var intersectionScore = this.layerIntersectsMapAux(this.MinX, this.MaxX, this.MinY, this.MaxY); 
+	var intersectionFilter = "fq={!frange+l%3D1+u%3D10}" + intersectionScore;
+	//intersectionFilter += "&fq=Area:[0.01+TO+*]";
+	//console.log(intersectionFilter);
+	return intersectionFilter;
+};
 
 /**
  * a private function that returns a search element to detect intersecting layers
@@ -601,8 +643,7 @@ org.OpenGeoPortal.Solr.prototype.getBaseKeywordQuery = function getBaseKeywordQu
 		return null;
 	}
 	
-	temp = temp.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
-	temp = this.escapeSolrValue(temp);
+	//temp = this.escapeSolrValue(temp);
 	var keywords = this.tokenize(temp);
 	var keywordQuery = "";
 	var i;
@@ -612,7 +653,7 @@ org.OpenGeoPortal.Solr.prototype.getBaseKeywordQuery = function getBaseKeywordQu
 	
 	for (i = 0 ; i < keywords.length ; i++){
 		
-		var currentKeyword = keywords[i].trim().replace(/["]/g, '\\"').replace(/[']/g, '\\"');
+		var currentKeyword = this.escapeSolrValue(keywords[i].trim());//.replace(/["]/g, '\\"').replace(/[']/g, '\\"');
 		
 		if (currentKeyword.length > 0){
 			
@@ -708,8 +749,8 @@ org.OpenGeoPortal.Solr.prototype.getKeywordFilter = function(keywords, arrFilter
 	var temp = keywords;
 	if ((temp == null) || (temp == "") || (temp.indexOf("Search for") > -1))
 		return null;
-	temp = temp.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
-	temp = this.escapeSolrValue(temp);
+	//temp = temp.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
+	//temp = this.escapeSolrValue(temp);
 	var keywords = this.tokenize(temp);
 	//var keywords = temp.split(" ");
 	var keywordFilter = "";
@@ -718,7 +759,7 @@ org.OpenGeoPortal.Solr.prototype.getKeywordFilter = function(keywords, arrFilter
 	var useKeywordFilter = false;
 	for (i = 0 ; i < keywords.length ; i++)
 	{
-		var currentKeyword = keywords[i].trim().replace(/["]/g, '\\"').replace(/[']/g, '\\"');
+		var currentKeyword = this.escapeSolrValue(keywords[i].trim());//.replace(/["]/g, '\\"').replace(/[']/g, '\\"');
 		/*if (i > 0)
 			keywordFilter += "+AND+";*/
 		if (currentKeyword.indexOf(":") > 0){
@@ -754,6 +795,59 @@ org.OpenGeoPortal.Solr.prototype.getKeywordFilter = function(keywords, arrFilter
 };
 
 
+//create a filter query for the keywords against the non-exact fields
+org.OpenGeoPortal.Solr.prototype.getKeywordPhraseFilter = function(keywords, arrTerms) {
+	//console.log(arrFilterFields);
+	var temp = keywords;
+	if ((temp == null) || (temp == "") || (temp.indexOf("Search for") > -1))
+		return null;
+
+	var keywords = this.tokenize(temp);
+
+	var keywordFilter = "";
+	var i;
+	var processedKeywordArr = [];
+	var useKeywordFilter = false;
+	for (i = 0 ; i < keywords.length ; i++)
+	{
+		var currentKeyword = this.escapeSolrValue(keywords[i].trim());
+
+		if (currentKeyword.indexOf(":") > 0){
+			// here if we have something of the form Field:Value
+			// that is, user supplied the Solr field name and its value
+			// nothing to do for the filter
+		} else {
+			useKeywordFilter = true;
+			// here if user entered keywords they want searched against standard fields
+			processedKeywordArr.push(currentKeyword);
+		}
+
+	}
+	
+	if (useKeywordFilter){
+		var arrFilterFields = [];
+		for (var j = 0; j < arrTerms.length; j++){
+			if (typeof arrTerms[j].baseTerm != "undefined"){
+				arrFilterFields.push(arrTerms[j].baseTerm);
+			}
+		}
+		if (keywords.length > 1){
+			processedKeyword = "'" + processedKeywordArr.join(" ") + "'";
+			var numFields = arrFilterFields.length;
+			var term = ":" + processedKeyword;
+			var boost = "^" + this.GenericPhraseBoost;
+			var joiner =  boost + "&pf=";
+			keywordFilter += arrFilterFields.join(term + joiner);
+			if (numFields > 0){
+				keywordFilter += term;
+			}
+			keywordFilter = "&pf=" + keywordFilter + boost;
+		} else {
+			keywordFilter = ""; //doesn't make sense to do phrase matching for single terms
+		}
+	}
+	return keywordFilter;
+};
 
 /*
  * Additional query and filter substrings for advanced search
@@ -881,13 +975,39 @@ org.OpenGeoPortal.Solr.prototype.getTopicQuery = function getTopicQuery()
 	return topicFilter;
 };
 
+org.OpenGeoPortal.Solr.prototype.filterDateValue = function filterDateValue(dateValue){
+	if ((dateValue == null) || (dateValue == "")){
+		return "";
+	}
+	//only 4 digit numbers should be allowed
+	if (!jQuery.isNumeric(dateValue)){
+		throw new Error("Year must be numeric");
+	}
+	var dateLen = dateValue.length;
+	
+	if (dateLen > 4){
+		throw new Error("Year cannot be more than 4 digits.");
+	} else if (dateLen == 4){
+		return dateValue;
+	} else if (dateLen == 3){
+		return "0" + dateValue;
+	} else if(dateLen == 2){
+		return "00" + dateValue;
+	} else if(dateLen == 1){
+		return "000" + dateValue;
+	} 
+		
+	return "";
+	
+};
+
 // this function must be passed years, either the from date or the to date can be null
 //  e.g., getDateFilter(1940, null);  // get layers since 1940
 org.OpenGeoPortal.Solr.prototype.getDateFilter = function getDateFilter()
 {
 	var dateSuffix = "-01-01T01:01:01Z";  // per an ISO standard solr expects
-	var fromDate = this.FromDate;
-	var toDate = this.ToDate;
+	var fromDate = this.filterDateValue(this.FromDate);
+	var toDate = this.filterDateValue(this.ToDate);
 	
 	if (((fromDate == null) || (fromDate == "")) && ((toDate == null) || (toDate =="")))
 		return "";  // no date search data specified so no search filter
@@ -938,56 +1058,40 @@ org.OpenGeoPortal.Solr.prototype.setOriginator = function setOriginator(originat
 	this.Originator = originator;
 };
 
-org.OpenGeoPortal.Solr.prototype.getPublisherFilter = function getPublisherFilter()
-{
-	if ((this.Publisher == null) || (this.Publisher == "")){
+org.OpenGeoPortal.Solr.prototype.getAndFilter = function(term, values){
+	if ((values == null) || (values == "")){
 		return "";
 	}
 	
-	var publishers = this.Publisher.split(" ");
-	var publishersFilter = "";
-	for (var i = 0 ; i < publishers.length ; i++){
+	var arrValues = this.tokenize(values);;
+	var filter = "";
+	for (var i = 0 ; i < arrValues.length ; i++){
 		
-		var currentSource = publishers[i];
+		var currentSource = this.escapeSolrValue(arrValues[i]);
 		if (currentSource.length > 0){
 			if (i == 0){
-				publishersFilter = "fq=";
+				filter = "fq=";
 			}
 			if (i > 0){
-				publishersFilter += "+AND+";
+				filter += "+AND+";
 			}
-			publishersFilter += "Publisher" + ":" + currentSource;
+			filter += term + ":" + currentSource;
 		}
 	}
-	return publishersFilter;
+	filter += "&pf=" + term + ":" + arrValues.join(" ");
+	return filter;
+};
+
+org.OpenGeoPortal.Solr.prototype.getPublisherFilter = function getPublisherFilter()
+{
+	return this.getAndFilter("Publisher", this.Publisher);
+
 };
 
 org.OpenGeoPortal.Solr.prototype.getOriginatorFilter = function getOriginatorFilter()
 {
-	if ((this.Originator == null) || (this.Originator == "")){
-		return "";
-	}
-	
-	var originators = this.Originator.split(" ");
-	var originatorsFilter = "";
-	
-	for (var i = 0 ; i < originators.length ; i++)
-	{
-		var currentSource = originators[i];
-		if (currentSource.length > 0)
-		{
-			if (i == 0){
-				originatorsFilter = "fq=";
-			}
-			
-			if (i > 0){
-				originatorsFilter += "+AND+";
-			}
-			
-			originatorsFilter += "Originator" + ":" + currentSource;
-		}
-	}
-	return originatorsFilter;
+	return this.getAndFilter("Originator", this.Originator);
+
 };
 
 /*
@@ -1112,8 +1216,8 @@ org.OpenGeoPortal.Solr.prototype.getReturnedColumnsClause = function getReturned
 	else if (requestType == org.OpenGeoPortal.Solr.prototype.CountRequest)
 		returnedColumns = "fl=";
 	else if (requestType == org.OpenGeoPortal.Solr.prototype.SearchRequest)
-		returnedColumns = "fl=Name,CollectionId,Institution,Access,DataType,Availability,LayerDisplayName,Publisher,GeoReferenced" +
-						  ",Originator,Location,MinX,MaxX,MinY,MaxY,ContentDate,LayerId,score,WorkspaceName,SrsProjectionCode";
+		returnedColumns = "fl=Name,Institution,Access,DataType,LayerDisplayName,Publisher,GeoReferenced" +
+						  ",Originator,Location,MinX,MaxX,MinY,MaxY,ContentDate,LayerId,score,WorkspaceName";
 	else
 		returnedColumns = "error in org.OpenGeoPortal.Solr.prototype.getReturnedColumnsClause" +
 						  " did not understand passed requestType " + requestType;
@@ -1198,12 +1302,15 @@ org.OpenGeoPortal.Solr.prototype.getSearchQuery = function getSearchQuery()
 		keywordQuery = this.getBasicKeywordQuery();
 		var arrBasicTerms = this.getBasicKeywordTermsArr();
 		keywordFilter = this.getKeywordFilter(basicKeywords, arrBasicTerms);
+		keywordFilter += this.getKeywordPhraseFilter(basicKeywords, this.getBasicKeywordTerms());
 	} else if (advancedKeywords != null){
 
 		var arrAdvancedTerms = this.getAdvancedKeywordTermsArr();
 
 		keywordQuery = this.getAdvancedKeywordQuery();
 		keywordFilter = this.getKeywordFilter(advancedKeywords, arrAdvancedTerms);
+		keywordFilter += this.getKeywordPhraseFilter(advancedKeywords, this.getAdvancedKeywordTerms());
+
 	}
 	var topic = this.getTopic();
 	if (topic != null){

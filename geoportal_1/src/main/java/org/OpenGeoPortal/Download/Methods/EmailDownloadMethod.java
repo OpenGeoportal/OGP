@@ -13,4 +13,6 @@ public interface EmailDownloadMethod {
 
 	Future<Boolean> sendEmail(List<LayerRequest> layerList);
 
+	Boolean hasRequiredInfo(LayerRequest layer);
+
 }

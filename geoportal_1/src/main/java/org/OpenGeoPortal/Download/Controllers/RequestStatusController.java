@@ -55,7 +55,7 @@ public class RequestStatusController {
 					this.downloadRequests.add(dlRequest);
 				}
 			} catch (Exception e){
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			try {
 				ImageRequest imRequest = requestStatusManager.getImageRequest(UUID.fromString(requestId));
@@ -63,7 +63,7 @@ public class RequestStatusController {
 					this.imageRequests.add(imRequest);
 				}
 			} catch (Exception e){
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			try {
 				GeoCommonsExportRequest exRequest = requestStatusManager.getExportRequest(UUID.fromString(requestId));
@@ -71,14 +71,16 @@ public class RequestStatusController {
 					this.exportRequests.add(exRequest);
 				}
 			} catch (Exception e){
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 		if ((this.downloadRequests.size() + this.imageRequests.size() + this.exportRequests.size()) > 0){
 			return getRequestStatus();
 		} else {
 			logger.error("no requests found");
-			throw new IOException("No requests found.");
+			//throw new IOException("No requests found.");
+			//return an empty status object instead of just throwing an error
+			return new RequestStatus();
 		}
 	}
 	

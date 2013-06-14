@@ -74,6 +74,14 @@ public class BoundingBox {
    		+ "</gml:Envelope>";
    		return envelope;
 	}
+	
+	public String generateOWSBoundingBox(int epsgCode){
+		String bounds  = "<ows:BoundingBox crs=\"urn:ogc:def:crs:EPSG::" + epsgCode + "\">" +
+				"<ows:LowerCorner>" + Double.toString(this.getMinY()) + " " + Double.toString(this.getMinX()) + "</ows:LowerCorner>" +
+				"<ows:UpperCorner>" + Double.toString(this.getMaxY()) + " " + Double.toString(this.getMaxX()) + "</ows:UpperCorner>" +
+			"</ows:BoundingBox>";
+		return bounds;
+	}
 	/*
 	 *         <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
            <gml:coordinates>-75.102613,40.212597 -72.361859,41.512517</gml:coordinates>

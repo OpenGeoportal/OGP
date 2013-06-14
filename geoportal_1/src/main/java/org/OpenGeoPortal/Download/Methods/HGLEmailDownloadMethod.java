@@ -6,7 +6,9 @@ import java.util.concurrent.Future;
 import org.OpenGeoPortal.Download.Types.BoundingBox;
 import org.OpenGeoPortal.Download.Types.LayerRequest;
 import org.OpenGeoPortal.Download.Types.LayerRequest.Status;
+import org.OpenGeoPortal.Utilities.OgpUtils;
 import org.OpenGeoPortal.Utilities.Http.HttpRequester;
+import org.codehaus.jackson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -85,9 +87,9 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 	public Future<Boolean> sendEmail(List<LayerRequest> layerList) {
 		this.layerList = layerList;
 		try {
-			logger.info(this.getUrl());
+			logger.info(this.getUrl(layerList.get(0)));
 			//logger.info(createDownloadRequest());
-			this.httpRequester.sendRequest(this.getUrl(), createDownloadRequest(), "GET");
+			this.httpRequester.sendRequest(this.getUrl(layerList.get(0)), createDownloadRequest(), "GET");
 			logger.info("Email request sent.");
 			this.setAllLayerStatus(Status.SUCCESS);
 			return new AsyncResult<Boolean>(true);
@@ -99,9 +101,25 @@ public class HGLEmailDownloadMethod implements EmailDownloadMethod {
 		}
 	}
 
-	private String getUrl() {
-		logger.info("Download URL: " + layerList.get(0).getDownloadUrl());
-		return layerList.get(0).getDownloadUrl();
+	@Override
+	public Boolean hasRequiredInfo(LayerRequest layerRequest){
+		if (!OgpUtils.isWellFormedEmailAddress(layerRequest.getEmailAddress())){
+			return false;
+		}
+		try {
+			if (getUrl(layerRequest) != null){
+				return true;
+			}
+		} catch (JsonParseException e) {
+		
+		}
+		logger.info("Layer does not have required info for HGLEmailDownload");
+		return false;
+	};
+	
+	private String getUrl(LayerRequest layer) throws JsonParseException {
+		logger.info("Download URL: " + layer.getDownloadUrl());
+		return layer.getDownloadUrl().get(0);
 	}
 
 }

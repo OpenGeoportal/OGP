@@ -305,6 +305,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	  	var rowData = tableObj.fnGetData(rowNode);
 	      //layerIDs returned from the search are used as OpenLayers layer names
 	  	var layerID = rowData[this.tableHeadingsObj.getColumnIndex("LayerId")];
+	  	var escapedLayerID = org.OpenGeoPortal.Utility.idEscape(layerID);
 	  	var dataType = rowData[this.tableHeadingsObj.getColumnIndex("DataType")];
 	  	var displayName = org.OpenGeoPortal.Utility.escapeQuotes(rowData[this.tableHeadingsObj.getColumnIndex("LayerDisplayName")]);
 	  	var extent = [];
@@ -322,10 +323,10 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 
 	    sOut += '<div class="opacityControlCell">';
 	    sOut += '<div class="opacityControl">opacity: ';
-	    sOut += '<div class="controlText opacityText" id="opacityText' +  tableID + layerID + '">' + opacityVal + '</div>';
+	    sOut += '<div class="controlText opacityText" id="opacityText' +  tableID + escapedLayerID + '">' + opacityVal + '</div>';
 	    sOut += '<img src="' + this.getImage("arrow_down.png") + '" class="controlExpand button" />';
 	    sOut += '</div>';
-	    sOut += '<div class="controlContainer"><div class="opacitySlider" title="Adjust layer transparency" id="opacity' +  tableID + layerID + '">';
+	    sOut += '<div class="controlContainer"><div class="opacitySlider" title="Adjust layer transparency" id="opacity' +  tableID + escapedLayerID + '">';
 	    sOut += '<img src="' + this.getImage("opacity_bg.png") + '" /></div></div>';
 	    sOut += '</div>';
 	    if ((dataType == "Raster")||(dataType == "Paper Map")||(dataType == "LibraryRecord")){
@@ -358,18 +359,18 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	    		sOut += "ln width: ";
 	    		break;
 	    	}
-	    	sOut += '<div class="controlText sizeText" id="sizeText' +  tableID + layerID + '">' + sizeVal + '</div>';
+	    	sOut += '<div class="controlText sizeText" id="sizeText' +  tableID + escapedLayerID + '">' + sizeVal + '</div>';
 		    sOut += '<img src="' + this.getImage("arrow_down.png") + '" class="controlExpand button" />';
 	    	sOut += '</div>';
-		    sOut += '<div class="controlContainer"><div class="sizeSlider" title="Adjust size" id="size' +  tableID + layerID + '">';
+		    sOut += '<div class="controlContainer"><div class="sizeSlider" title="Adjust size" id="size' +  tableID + escapedLayerID + '">';
 		    sOut += '<img src="' + this.getImage("opacity_bg.png") + '" /></div></div>';
 		    //sOut += '<input type="checkbox" class="outlineControl" title="Add an outline to polygon layer" id="outlineCheckBox' + tableID + layerID;
 		    //sOut += '" onclick="org.OpenGeoPortal.ui.toggleOutline(this, \'' + layerID + '\', \'' + dataType + '\')"/><label for="outlineCheckBox' + tableID + layerID + '" title="Add an outline to polygon layer">outline</label>';
 	    	sOut += '</div>';
-	    	sOut += '<div class="colorControlCell"><div class="colorPalette button" title="Change the layer color" id="colorPalette' + tableID + layerID + '" onclick="org.OpenGeoPortal.ui.colorDialog(\'' + layerID + '\', \'' + dataType + '\')"></div></div>';
+	    	sOut += '<div class="colorControlCell"><div class="colorPalette button" title="Change the layer color" id="colorPalette' + tableID + escapedLayerID + '" onclick="org.OpenGeoPortal.ui.colorDialog(\'' + layerID + '\', \'' + dataType + '\')"></div></div>';
 	    	sOut += '<div class="zoomToLayerControlCell"><img src="' + this.getImage("zoomextent.gif") + '" class="button zoomToLayerControl" alt="Zoom to geographic extent of layer" title="Zoom to geographic extent of layer" onclick="org.OpenGeoPortal.map.zoomToLayerExtent(\'' + extent.join() + '\')" /></div>';
 	    	sOut += '<div class="attributeInfoControlCell">';
-	    	sOut +=	'<img src="' + attributeToolImg + '" id="attributeInfoControl' + tableID + layerID + '"class="button attributeInfoControl" alt="Show Attributes" title="Click a previewed feature on the map to view its attributes" onclick="org.OpenGeoPortal.ui.toggleFeatureInfo(this, \'' + layerID + '\', \'' + displayName + '\')" /></div>';
+	    	sOut +=	'<img src="' + attributeToolImg + '" id="attributeInfoControl' + tableID + escapedLayerID + '"class="button attributeInfoControl" alt="Show Attributes" title="Click a previewed feature on the map to view its attributes" onclick="org.OpenGeoPortal.ui.toggleFeatureInfo(this, \'' + layerID + '\', \'' + displayName + '\')" /></div>';
 	    }
 
 	    sOut += '</div>';
@@ -536,7 +537,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	  };
 	  
 	  this.openRow = function(rowNode){
-		  try{
+
           /* Open this row */
 	      var detailsOpen = this.getImage("arrow_down.png");
           jQuery(rowNode).find(".colExpand img").attr('src', detailsOpen);
@@ -561,6 +562,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 		  if (tableID != 'savedLayers'){
 			  this.setTableLength();
 		  }
+		  try{
     	  if ((dataType == "Raster")||(dataType =="Paper Map")||(dataType == "LibraryRecord")){
     		  //return;
     	  } else {
@@ -599,6 +601,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
               		}
     		  });
     	  	}
+
 		  var opacityControl = jQuery("div.opacityControl");
 		  opacityControl.each(function(){
 			  jQuery(this).parent().hover(function(){org.OpenGeoPortal.ui.openControl(this);}, function(){org.OpenGeoPortal.ui.closeControl(this);});
@@ -968,6 +971,8 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	            var aData = tableObj.fnGetData(tableElement[0]);
 	            //our layer id is being used as the openlayers layer name
 	            var layerID = aData[this.tableHeadingsObj.getColumnIndex("LayerId")];
+	            //var layerID = org.OpenGeoPortal.Utility.idEscape(aData[this.tableHeadingsObj.getColumnIndex("LayerId")]);
+
       	    	var dataType = aData[this.tableHeadingsObj.getColumnIndex("DataType")];
             	var access = aData[this.tableHeadingsObj.getColumnIndex("Access")];
             	var institution = aData[this.tableHeadingsObj.getColumnIndex("Institution")];
@@ -1005,6 +1010,8 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	            //check to see if layer is on openlayers map, if so, show layer
 	            var opacitySetting = layerState.getState(layerID, "opacity");
 	            if (org.OpenGeoPortal.map.getLayersByName(layerID)[0]){
+	            	console.log("layer match");
+	            	console.log(layerID);
 	            	org.OpenGeoPortal.map.showLayer(layerID);
 	            	org.OpenGeoPortal.map.getLayersByName(layerID)[0].setOpacity(opacitySetting * .01);
 		            jQuery(thisObj).attr('title', hideLayerText);
@@ -1021,7 +1028,12 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	            	var mapObj = {"institution": institution, "layerName": layerName, "title": layerID, 
 	            			"bbox": bbox, "dataType": dataType, "opacity": opacitySetting *.01, "access": access, "location": location};
             		//should have some sort of method to determine preview type based on location field
-	            	if (availability.toLowerCase() == "online"){
+	            	if (availability.toLowerCase() == "offline"){
+	            		//try to preview bounds
+	            		//console.log(mapObj);
+            			org.OpenGeoPortal.map.addMapBBox(mapObj);
+            			layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
+	            	} else {
 	            		if (typeof location.wms != "undefined"){
 	            			if ((wmsNamespace.length > 0)
 	            				&&(layerName.indexOf(":") == -1)){
@@ -1042,12 +1054,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 						} else {
 	            			throw new Error("This layer is currently not previewable.");
 	            		}
-	            	} else if (availability.toLowerCase() == "offline"){
-	            		//try to preview bounds
-	            		//console.log(mapObj);
-            			org.OpenGeoPortal.map.addMapBBox(mapObj);
-            			layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
-	            	}
+	            	} 
 	            }
 	            this.addToPreviewedLayers(tableElement);
 	            analytics.track("Layer Previewed", institution, layerID);
@@ -1831,7 +1838,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 		if (status == 'searchStart'){
 			jQuery("#searchResults").animate({
 				opacity: 0.5
-			}, 50);
+			}, 25);
 		} else if (status == 'searchEnd'){
 		    jQuery("#searchResults").animate({
     		    opacity: 1

@@ -283,6 +283,10 @@ span.infoLinks:hover {
 	vertical-align: top;
 }
 
+#basemapSelect .ui-button-text {
+         margin-top: -3px;
+}
+
 #basemapSelect {
 	height: 24px;
 	-moz-border-radius: 4px 4px 0px 0px;

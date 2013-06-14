@@ -3,6 +3,7 @@ package org.OpenGeoPortal.Download;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -25,7 +26,7 @@ import org.springframework.scheduling.annotation.Async;
 public class MultiLayerDownloader implements LayerDownloader {
 	private MultiLayerDownloadMethod multiLayerDownloadMethod;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private List<Future<File>> downloadFutures = new ArrayList<Future<File>>();
+	private List<Future<Set<File>>> downloadFutures = new ArrayList<Future<Set<File>>>();
 
 	@Async
 	@Override
@@ -36,7 +37,7 @@ public class MultiLayerDownloader implements LayerDownloader {
 				//check to see if the filename exists
 			//this should fire off a callable that asynchronously calls the download method
 			try {
-				Future<File> currentFile = this.multiLayerDownloadMethod.download(currentLayer);
+				Future<Set<File>> currentFile = this.multiLayerDownloadMethod.download(currentLayer);
 				downloadFutures.add(currentFile);
 			} catch (Exception e){
 				//e.printStackTrace();
@@ -46,8 +47,8 @@ public class MultiLayerDownloader implements LayerDownloader {
 			}
 		} 
 		List<File> downloadedLayers = new ArrayList<File>();
-		for (Future<File> currentFuture: downloadFutures){
-			downloadedLayers.add(currentFuture.get());
+		for (Future<Set<File>> currentFuture: downloadFutures){
+			downloadedLayers.addAll(currentFuture.get());
 		}
 	}
 
@@ -60,5 +61,10 @@ public class MultiLayerDownloader implements LayerDownloader {
 	public void setMultiLayerDownloadMethod(
 			MultiLayerDownloadMethod multiLayerDownloadMethod) {
 		this.multiLayerDownloadMethod = multiLayerDownloadMethod;
+	}
+
+	@Override
+	public Boolean hasRequiredInfo(LayerRequest layer) {
+		return multiLayerDownloadMethod.hasRequiredInfo(layer);
 	}
 }

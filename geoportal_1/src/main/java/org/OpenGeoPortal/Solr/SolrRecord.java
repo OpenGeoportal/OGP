@@ -77,6 +77,11 @@ public class SolrRecord {
 	public void setLayerId(String layerId) {
 		this.layerId = layerId;
 	}
+	
+	/*public void setLayerId(String[] layerIdArr){
+		this.layerId = layerIdArr[0];
+	}*/
+	
 	public String getName() {
 		return name;
 	}
@@ -151,6 +156,9 @@ public class SolrRecord {
 	public Boolean getGeoreferenced() {
 		return georeferenced;
 	}
+	/*public void setGeoreferenced(Boolean georeferenced) {
+		this.georeferenced = georeferenced;
+	}*/
 	public void setGeoreferenced(Boolean georeferenced) {
 		this.georeferenced = georeferenced;
 	}

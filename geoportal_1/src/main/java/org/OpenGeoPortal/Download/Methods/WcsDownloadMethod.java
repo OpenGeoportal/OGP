@@ -1,24 +1,28 @@
 package org.OpenGeoPortal.Download.Methods;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.OpenGeoPortal.Download.Types.BoundingBox;
+import org.OpenGeoPortal.Download.Types.LayerRequest;
+import org.OpenGeoPortal.Ogc.OgcInfoRequest;
 import org.OpenGeoPortal.Solr.SolrRecord;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.OpenGeoPortal.Utilities.OgpUtils;
+import org.codehaus.jackson.JsonParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLayerDownloadMethod {	
 	private static final Boolean INCLUDES_METADATA = false;
 	private static final String METHOD = "POST";
 
+	@Autowired
+	@Qualifier("ogcInfoRequest.wcs_1_0_0")
+	private OgcInfoRequest ogcInfoRequest;
 	@Override
 	public String getMethod(){
 		return METHOD;
@@ -99,89 +103,22 @@ public class WcsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 	}
 	
 	@Override
-	public String getUrl(){
-		return this.currentLayer.getWcsUrl();
-	};
+	public List<String> getUrls(LayerRequest layer) throws MalformedURLException, JsonParseException{
+		String url = layer.getWcsUrl();
+		this.checkUrl(url);
+		return urlToUrls(url);
+	}
 	
 	 Map<String, String> getWcsDescribeLayerInfo()
-	 	throws Exception
-	 {
-			//should be xml
-			//do this later....
-			/*DocumentFragment requestXML = createDocumentFragment();
-			// Insert the root element node
-			Element rootElement = requestXML.createElement("DescribeFeatureType");
-			requestXML.appendChild(rootElement);*/
+	 	throws Exception {
+
 			String layerName = this.currentLayer.getLayerNameNS();
 			
-			String describeCoverageRequest = "version=1.0.0&REQUEST=DescribeCoverage&Identifiers=" + layerName;
-			InputStream inputStream = this.httpRequester.sendRequest(this.getUrl(), describeCoverageRequest, "GET");
+			InputStream inputStream = this.httpRequester.sendRequest(OgpUtils.filterQueryString(this.getUrl(this.currentLayer)), ogcInfoRequest.createRequest(layerName), ogcInfoRequest.getMethod());
 			//parse the returned XML and return needed info as a map
-			// Create a factory
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setValidating(false);  // dtd isn't available; would be nice to attempt to validate
-			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			// Use document builder factory
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			//Parse the document
-			Document document = builder.parse(inputStream);
-			//initialize return variable
-			Map<String, String> describeLayerInfo = new HashMap<String, String>();
-
-			//get the needed nodes
-			Node schemaNode = document.getFirstChild();
-			if (schemaNode.getNodeName().equals("ServiceExceptionReport")){
-				String errorMessage = "";
-				for (int i = 0; i < schemaNode.getChildNodes().getLength(); i++){
-					String nodeName = schemaNode.getChildNodes().item(i).getNodeName();
-					if (nodeName.equals("ServiceException")){
-						errorMessage += schemaNode.getChildNodes().item(i).getTextContent().trim();
-					}
-				}
-				throw new Exception("ServiceException: " + errorMessage);
-			}
-
-			try{
-				//NodeList supportedCRSs = document.getElementsByTagName("wcs:supportedCRS");
-				NodeList supportedCRSs = document.getElementsByTagName("wcs:requestResponseCRSs");
-				describeLayerInfo.put("SRS", supportedCRSs.item(0).getTextContent().trim());
-			} catch (Exception e){
-				throw new Exception("error getting SRS info: "+ e.getMessage());
-	
-			}
-			try {
-				NodeList gridEnvelopeLow = document.getElementsByTagName("gml:low");
-				describeLayerInfo.put("gridEnvelopeLow", gridEnvelopeLow.item(0).getTextContent().trim());
-				NodeList gridEnvelopeHigh = document.getElementsByTagName("gml:high");
-				describeLayerInfo.put("gridEnvelopeHigh", gridEnvelopeHigh.item(0).getTextContent().trim());
-			} catch (Exception e){
-				throw new Exception("error getting Grid Envelope info: "+ e.getMessage());
-			}
-			try{
-				NodeList axes = document.getElementsByTagName("gml:axisName");
-				axes.getLength();
-				for (int i = 0; i < axes.getLength(); i++){
-					describeLayerInfo.put("axis" + i, axes.item(i).getTextContent().trim());
-				}
-				//NodeList supportedFormats = document.getElementsByTagName("wcs:supportedFormats");
-				//NodeList supportedFormats = document.getElementsByTagName("wcs:supportedCRS");
-				//describeLayerInfo.put("nativeFormat", supportedFormats.item(0).getTextContent().trim());
-			} catch (Exception e){
-				throw new Exception("error getting Axis info: "+ e.getMessage());
-			}
-			return describeLayerInfo;
+			return ogcInfoRequest.parseResponse(inputStream);
 	 }
 
-	 void handleServiceException(Node schemaNode) throws Exception{
-			String errorMessage = "";
-			for (int i = 0; i < schemaNode.getChildNodes().getLength(); i++){
-				String nodeName = schemaNode.getChildNodes().item(i).getNodeName();
-				if (nodeName.equals("ServiceException")){
-					errorMessage += schemaNode.getChildNodes().item(i).getTextContent().trim();
-				}
-			}
-			throw new Exception(errorMessage);
-	 }
 	 
 		@Override
 		public Boolean includesMetadata() {
