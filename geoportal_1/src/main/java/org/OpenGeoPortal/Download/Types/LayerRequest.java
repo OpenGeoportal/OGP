@@ -10,7 +10,9 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.OpenGeoPortal.Solr.SolrRecord;
+import org.OpenGeoPortal.Utilities.OgpUtils;
 import org.OpenGeoPortal.Utilities.ParseJSONSolrLocationField;
+import org.codehaus.jackson.JsonParseException;
 
 public class LayerRequest {
 	final String id;
@@ -145,23 +147,23 @@ public class LayerRequest {
 		return this.status;
 	}
 	
-	public String getLayerNameNS(){
-		return this.layerInfo.getWorkspaceName() + ":" + this.layerInfo.getName();
+	public String getLayerNameNS() throws Exception{
+		return OgpUtils.getLayerNameNS(this.layerInfo.getWorkspaceName(), this.layerInfo.getName());
 	}
 
-	public String getWmsUrl(){
+	public String getWmsUrl() throws JsonParseException{
 		return ParseJSONSolrLocationField.getWmsUrl(this.layerInfo.getLocation());
 	}
 	
-	public String getWfsUrl(){
+	public String getWfsUrl() throws JsonParseException{
 		return ParseJSONSolrLocationField.getWfsUrl(this.layerInfo.getLocation());
 	}
 	
-	public String getWcsUrl(){
+	public String getWcsUrl() throws JsonParseException{
 		return ParseJSONSolrLocationField.getWcsUrl(this.layerInfo.getLocation());
 	}
 	
-	public String getDownloadUrl(){
+	public List<String> getDownloadUrl() throws JsonParseException{
 		return ParseJSONSolrLocationField.getDownloadUrl(this.layerInfo.getLocation());
 	}
 
@@ -176,4 +178,5 @@ public class LayerRequest {
 	public void setFutureValue(Future<?> futureValue) {
 		this.futureValue = futureValue;
 	}
+
 }

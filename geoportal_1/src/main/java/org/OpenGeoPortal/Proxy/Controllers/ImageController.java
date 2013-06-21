@@ -13,11 +13,12 @@ import org.OpenGeoPortal.Proxy.Controllers.ImageRequest.LayerImage;
 import org.OpenGeoPortal.Security.OgpUserContext;
 import org.OpenGeoPortal.Solr.SearchConfigRetriever;
 import org.OpenGeoPortal.Solr.SolrRecord;
+import org.OpenGeoPortal.Utilities.OgpUtils;
+import org.OpenGeoPortal.Utilities.ParseJSONSolrLocationField;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +36,7 @@ public class ImageController {
 	private SearchConfigRetriever searchConfigRetriever;
 	@Autowired
 	private ImageHandler imageHandler;
-	private @Value("${ogp.proxyToWMS}") String proxyTo;
+
 	private boolean isLocallyAuthenticated;// = true;
 	@Autowired
 	private OgpUserContext ogpUserContext;
@@ -121,11 +122,11 @@ public class ImageController {
 	    		   	
 	    		   	layerImage.setQueryString(baseQuery + layerQueryString);
 	    		   	logger.debug(layerImage.getQueryString());
-	    			if (this.layerInfoRetriever.hasProxy(solrRecord)){
-	    				layerImage.setBaseUrl(this.proxyTo);
+	    			if (this.searchConfigRetriever.hasWmsProxy(solrRecord.getInstitution(), solrRecord.getAccess())){ 
+	    				layerImage.setBaseUrl(this.searchConfigRetriever.getWmsProxyInternal(solrRecord.getInstitution(), solrRecord.getAccess()));
 	    			}  else {
 	        		   	try {
-	    					layerImage.setBaseUrl(this.layerInfoRetriever.getWMSUrl(solrRecord));
+	    					layerImage.setBaseUrl(OgpUtils.filterQueryString(ParseJSONSolrLocationField.getWmsUrl(solrRecord.getLocation())));
 	    				} catch (Exception e1) {
 	    					e1.printStackTrace();
 	    				}

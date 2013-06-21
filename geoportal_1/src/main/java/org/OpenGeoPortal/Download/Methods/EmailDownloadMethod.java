@@ -11,7 +11,8 @@ public interface EmailDownloadMethod {
 
 	String createDownloadRequest();
 
-	Future<Boolean> sendEmail(List<LayerRequest> layerList)
-			throws Exception;
+	Future<Boolean> sendEmail(List<LayerRequest> layerList);
+
+	Boolean hasRequiredInfo(LayerRequest layer);
 
 }

@@ -1,10 +1,15 @@
 package org.OpenGeoPortal.Download.Methods;
 
+import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.OpenGeoPortal.Download.Types.BoundingBox;
+import org.OpenGeoPortal.Download.Types.LayerRequest;
 import org.OpenGeoPortal.Layer.GeometryType;
+import org.OpenGeoPortal.Utilities.OgpUtils;
+import org.codehaus.jackson.JsonParseException;
 
 public class KmlDownloadMethod extends AbstractDownloadMethod implements PerLayerDownloadMethod {
 	private static final Boolean INCLUDES_METADATA = false;
@@ -54,7 +59,10 @@ public class KmlDownloadMethod extends AbstractDownloadMethod implements PerLaye
 	}
 
 	@Override
-	public String getUrl() {
-		return this.currentLayer.getWmsUrl();
+	public List<String> getUrls(LayerRequest layer) throws MalformedURLException, JsonParseException{
+		String url = layer.getWmsUrl();
+		url = OgpUtils.filterQueryString(url);
+		this.checkUrl(url);
+		return urlToUrls(url);
 	}
 }

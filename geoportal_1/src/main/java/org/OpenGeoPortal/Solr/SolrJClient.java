@@ -7,6 +7,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
@@ -30,13 +31,16 @@ public class SolrJClient implements SolrClient{
 			String url = searchConfigRetriever.getSearchUrl();
 			url = url.substring(0, url.indexOf("/select"));
 			//logger.info(url);
-			SolrServer server = new HttpSolrServer(url);
+			HttpSolrServer httpServer = new HttpSolrServer(url);
 			  // Note that the following property could be set through JVM level arguments too
 			  /*System.setProperty("solr.solr.home", "/home/shalinsmangar/work/oss/branch-1.3/example/solr");
 			  CoreContainer.Initializer initializer = new CoreContainer.Initializer();
 			  CoreContainer coreContainer = initializer.initialize();
 			  EmbeddedSolrServer server = new EmbeddedSolrServer(coreContainer, "");*/
-			this.solrServer = server;
+			
+			httpServer.setParser(new XMLResponseParser());
+			this.solrServer = (SolrServer) httpServer;
+			
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

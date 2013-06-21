@@ -137,8 +137,12 @@ public class DownloadHandlerImpl implements DownloadHandler, BeanFactoryAware {
 			String currentClassKey = null;
 			try {
 				currentClassKey = this.downloadConfigRetriever.getClassKey(layerRequest);
+				if (currentClassKey == null){
+					throw new Exception();
+				}
 				logger.info("DownloadKey: " + currentClassKey);
 			} catch(Exception e) {
+				e.printStackTrace();
 				layerRequest.setStatus(Status.FAILED);
 				logger.info("No download method found for: '" + record.getLayerId() +"'");
 				continue;
@@ -155,7 +159,7 @@ public class DownloadHandlerImpl implements DownloadHandler, BeanFactoryAware {
 		return downloadMap;
 		
 	}
-
+	
 	private LayerRequest createLayerRequest(SolrRecord solrRecord, String requestedFormat, String[] bounds){
 		LayerRequest layer = new LayerRequest(solrRecord, requestedFormat);
 		layer.setRequestedBounds(new BoundingBox(bounds[0], bounds[1], bounds[2], bounds[3]));

@@ -453,6 +453,11 @@ org.OpenGeoPortal.Downloader = function(){
 			url = "getDownload?requestId=" + currentRequestId;
 			jQuery('body').append('<iframe id="' + currentRequestId + '" class="download" src="' + url + '"></iframe>');
 
+		} else if (statusObj.type == "email"){
+			currentRequestId = statusObj.requestId;
+			that.layerRequestToComplete(statusObj);
+			jQuery(document).trigger("downloadEmailSent");
+			
 		} else if (statusObj.type == "image"){
 			currentRequestId = statusObj.requestId;
 			that.imageRequestToComplete(statusObj);

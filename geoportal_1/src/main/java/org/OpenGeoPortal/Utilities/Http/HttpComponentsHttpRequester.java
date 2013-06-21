@@ -2,7 +2,11 @@ package org.OpenGeoPortal.Utilities.Http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import org.OpenGeoPortal.Utilities.OgpUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -18,6 +22,8 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected String contentType;	
 	private OgpHttpClient ogpHttpClient;
+	private int status;
+	protected Header[] headers;
 	
 	public OgpHttpClient getOgpHttpClient() {
 		return ogpHttpClient;
@@ -31,16 +37,57 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 		this.contentType = contentType;
 	}
 	
-	public InputStream sendGetRequest(String url){
+	public Header[] getHeaders(){
+		return headers;
+	}
+	
+	public void setStatus(int status){
+		this.status = status;
+	}
+	
+	@Override
+	public int getStatus(){
+		return status;
+	}
+	
+	@Override
+	public String getHeaderValue(String headerName) throws Exception{
+		for (Header header: getHeaders()){
+			if(header.getName().equalsIgnoreCase(headerName)){
+				return header.getValue();
+			}
+		}
+		throw new Exception("Header ['" + headerName + "'] not found.");
+	}
+	
+	private Boolean checkUrl(String url) {
+		try{
+			new URL(url);
+			return true;
+		} catch (Exception e){
+			logger.error("URL is somehow invalid: " + url);
+			return false;
+		}
+	}
+	
+	public InputStream sendGetRequest(String url) throws MalformedURLException{
+		/*if (!checkUrl(url)){
+			throw new MalformedURLException();
+		}*/
+		logger.debug("about to send url: " + url);
 		HttpClient httpclient = ogpHttpClient.getHttpClient();
 		InputStream replyStream = null;
 		try {
 			HttpGet httpget = new HttpGet(url);
-			logger.debug("executing get request " + httpget.getURI());
+			
+			logger.info("executing get request " + httpget.getURI());
 
 			HttpResponse response = httpclient.execute(httpget);
+			this.setStatus(response.getStatusLine().getStatusCode());
+			this.setHeaders(response.getAllHeaders());
 			HttpEntity entity = response.getEntity();
 			this.setContentType(entity.getContentType().getValue());
+			
 			if (entity != null) {
 				 replyStream = entity.getContent();
 			} 
@@ -71,12 +118,15 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 		InputStream replyStream = null;
 		try {
 			HttpPost httppost = new HttpPost(serviceURL);
-			logger.info(requestBody);
+			logger.debug(requestBody);
 			StringEntity postEntity = new StringEntity(requestBody, ContentType.create(contentType, "UTF-8"));
 			httppost.setEntity(postEntity);
 			logger.info("executing POST request to " + httppost.getURI());
 			HttpResponse response = httpclient.execute(httppost);
+			this.setStatus(response.getStatusLine().getStatusCode());
+			this.setHeaders(response.getAllHeaders());
 			HttpEntity entity = response.getEntity();
+			
 			this.setContentType(entity.getContentType().getValue());
 			if (entity != null) {
 				 replyStream = entity.getContent();
@@ -96,6 +146,10 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 		return replyStream;
 	}
 
+	private void setHeaders(Header[] allHeaders) {
+		headers = allHeaders;
+	}
+	
 	@Override
 	public InputStream sendRequest(String serviceURL, String requestString,
 			String requestMethod, String contentType) throws IOException {
@@ -103,15 +157,26 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 		logger.debug("Query string: " + requestString);
 		logger.debug("Request Method: " + requestMethod);
 		if ((serviceURL.isEmpty())||(serviceURL.equals(null))){
+			logger.error("No service URL!");
 			throw new IOException("No URL provided!");
+		}
+		
+		if (!checkUrl(serviceURL)){
+			logger.error("Malformed URL: " + serviceURL);
+			throw new MalformedURLException();
 		}
 		if (requestMethod.equals("POST")){
 			return sendPostRequest(serviceURL, requestString, contentType);
 		} else if (requestMethod.equals("GET")){
-			return sendGetRequest(serviceURL + "?" + requestString);
+			String url = "";
+			try {
+				url = OgpUtils.combinePathWithQuery(serviceURL, requestString);
+			} catch (Exception e){
+				throw new IOException("Problem forming URL: " + e.getMessage());
+			}
+			return sendGetRequest(url);
 		} else {
-			//throw new Exception("The method " + requestMethod + " is not supported.");
-			return null;
+			throw new IOException("The method " + requestMethod + " is not supported.");
 		}
 	}
 

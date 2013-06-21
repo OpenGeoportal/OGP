@@ -11,6 +11,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.codehaus.jackson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,8 @@ public class SolrLayerInfoRetriever implements LayerInfoRetriever{
 		SolrServer server = solrClient.getSolrServer();
 		String query = "";
 		for (String layerId : layerIds){
-			query += "LayerId:" + layerId.trim();
+			logger.debug(layerId);
+			query += "LayerId:" + ClientUtils.escapeQueryChars(layerId.trim());
 			query += " OR ";
 		}
 		if (query.length() > 0){
@@ -56,8 +59,8 @@ public class SolrLayerInfoRetriever implements LayerInfoRetriever{
 		return results;
 	}
 
-	@Override
-	public String getWMSUrl(SolrRecord solrRecord) {
+	/*@Override
+	public String getWMSUrl(SolrRecord solrRecord) throws JsonParseException {
 		if (hasProxy(solrRecord)){
 			String institution = solrRecord.getInstitution();//layerInfo.get("Institution");
 			String accessLevel = solrRecord.getAccess();//layerInfo.get("Access")
@@ -74,25 +77,8 @@ public class SolrLayerInfoRetriever implements LayerInfoRetriever{
 		} else {
 			return ParseJSONSolrLocationField.getWmsUrl(solrRecord.getLocation());
 		}
-	}
+	}*/
 
-	@Override
-	public boolean hasProxy(SolrRecord layerInfo) {
-		String institution = layerInfo.getInstitution();
-		String accessLevel = layerInfo.getAccess();
-		String wmsProxyUrl = null;
-		try {
-			wmsProxyUrl = this.searchConfigRetriever.getWmsProxy(institution, accessLevel);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (wmsProxyUrl != null){
-			return true;
-		} else {
-			return false;
-		}
-	}
 	
 	@Override
 	public SolrRecord getAllLayerInfo(String layerId) throws SolrServerException{
@@ -103,8 +89,8 @@ public class SolrLayerInfoRetriever implements LayerInfoRetriever{
 		return results.get(0);
 	}
 
-	@Override
-	public String getWFSUrl(SolrRecord solrRecord) {
+	/*@Override
+	public String getWFSUrl(SolrRecord solrRecord) throws JsonParseException {
 		logger.info("Has proxy url: " + Boolean.toString(hasProxy(solrRecord)));
 		if (hasProxy(solrRecord)){
 			String institution = solrRecord.getInstitution();//layerInfo.get("Institution");
@@ -120,6 +106,6 @@ public class SolrLayerInfoRetriever implements LayerInfoRetriever{
 		} else {
 			return ParseJSONSolrLocationField.getWfsUrl(solrRecord.getLocation());
 		}
-	}
+	}*/
 
 }

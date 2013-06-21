@@ -84,7 +84,9 @@ org.OpenGeoPortal.UserInterface = function(){
 				analytics.track("Search", search, keyword);
 			} 
 		});
-		jQuery("#advancedSearchSubmit").click(function(){that.searchSubmit()});
+		jQuery("#advancedSearchSubmit").click(function(){that.searchSubmit();});
+		jQuery("#advancedSearchClear").click(function(){that.clearAdvancedSearch();});
+
 		jQuery("#geosearch").keypress(function(event){
 			if (event.keyCode == '13') {
 				var location = jQuery("#geosearch").val();
@@ -192,6 +194,7 @@ org.OpenGeoPortal.UserInterface = function(){
 		this.createSortMenu();
 		this.createColumnsMenu();
 
+		this.downloadEmailDialogHandler();
 		jQuery("#basicSearchTextField").val(this.searchText).focus();
 		jQuery("#basicSearchTextField").focusin(function(){
 			var current = jQuery(this);
@@ -774,6 +777,26 @@ org.OpenGeoPortal.UserInterface.prototype.clearInput = function(divName){
 				this.selectedIndex = 0;
 			}
 		});
+};
+
+org.OpenGeoPortal.UserInterface.prototype.clearAdvancedSearch = function(){
+	jQuery('#advancedSearchForm :input').each(function(){
+		var type = this.type;
+		var tag = this.tagName.toLowerCase();
+		if (type == 'text' || type == 'password' || tag == 'textarea'){
+			this.value = '';
+		} else if (type == 'checkbox'){
+			this.checked = true;
+			if (jQuery(this).attr("id") == "restrictedCheck"){
+				this.checked = false;
+			}	
+		} else if (tag == 'radio'){
+			this.checked = false;
+		} else if (tag == 'select'){
+			this.selectedIndex = 0;
+		}
+		jQuery(".topicRadio").first().attr("checked", true);
+	});
 };
 
 org.OpenGeoPortal.UserInterface.prototype.clearDefault = function(inputFieldName)
@@ -2464,6 +2487,16 @@ org.OpenGeoPortal.UserInterface.prototype.maximizeDialog = function(dialogId){
 		//>>> jQuery("#geoCommonsExportDialog").dialog("option", "position", jQuery("#geoCommonsExportDialog").data("maxPosition"))
 };
 
+org.OpenGeoPortal.UserInterface.prototype.downloadEmailDialogHandler = function(){
+	var that = this;
+	jQuery(document).on("downloadEmailSent", function(){
+		var dialogDivId = "downloadEmailSent";
+		var dialogContent = "An email with a link to your files from Harvard has been requested!";
+		var dialogTitle = "EMAIL SENT";
+		var buttonsObj = {OK: function(){jQuery(this).dialog('close');}};
+		that.dialogTemplate(dialogDivId, dialogContent, dialogTitle, buttonsObj);
+	});
+};
 
 org.OpenGeoPortal.UserInterface.prototype.autocomplete = function(){
 
@@ -2484,9 +2517,12 @@ org.OpenGeoPortal.UserInterface.prototype.autocomplete = function(){
                         i++;
                         i++;
                     }
+                    //console.log("here");
                 response(labelArr);
         		};
-        		var facetError = function(){};
+        		var facetError = function(){jQuery( "#advancedOriginatorText" ).autocomplete( "destroy" );
+        			jQuery( "#advancedOriginatorText" ).removeClass("ui-autocomplete-loading");
+        		};
            solr.termQuery(query, facetSuccess, facetError, this);
 
         },

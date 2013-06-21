@@ -454,26 +454,15 @@ org.OpenGeoPortal.MapController.prototype.wmsGetFeature = function(e){
 	var mapObject = this.map;
 	var layerStateObject = mapObject.layerStateObject;
 	var that = this;
-	var PIXELS = 10;//#pixel(s) on each side
-	var pixelSize = mapObject.getGeodesicPixelSize();//pixel size in kilometers
-	//console.log(pixelSize);
-	var xbboxSize = pixelSize.w * PIXELS * 1000;//in meters
-	var ybboxSize = pixelSize.h * PIXELS * 1000;
+
 	var point = mapObject.getLonLatFromViewPortPx(e.xy);
 	var pixel = e.xy;
-	//console.log(point);
-	//var srcProj = new OpenLayers.Projection("EPSG:4326");
-	//var destProj = new OpenLayers.Projection("EPSG:900913");
-	var projPoint = point;//.transform(srcProj, destProj);
-	//console.log(projPoint);
-	var xMin = projPoint.lon - xbboxSize/2;
-	var yMin = projPoint.lat - ybboxSize/2;
-	var xMax = projPoint.lon + xbboxSize/2;
-	var yMax = projPoint.lat + ybboxSize/2;
+
 	var layerID = this.name;
 	var searchString = "OGPID=" + layerID;
-	searchString += "&bbox=" + this.map.getExtent().toBBOX();//+ xMin + "," + yMin + "," + xMax + "," + yMax;
-		//+ this.map.getExtent().toBBOX(); 
+	searchString += "&bbox=" + this.map.getExtent().toBBOX();
+	searchString += "&lon=" + point.lon + "&lat=" + point.lat;
+	searchString += "&buffer=" + this.map.getGeodesicPixelSize().w * 1000;
 	//geoserver doesn't like fractional pixel values
 	searchString += "&x=" + Math.round(pixel.x) + "&y=" + Math.round(pixel.y);
 	searchString += "&height=" + this.map.size.h + "&width=" + this.map.size.w;
@@ -485,6 +474,7 @@ org.OpenGeoPortal.MapController.prototype.wmsGetFeature = function(e){
             data: searchString,
             dataType: 'text',
             success: function(data, textStatus, XMLHttpRequest){
+            	console.log(data);
             	//create a new dialog instance, or just open the dialog if it already exists
             	var dialogTitle = '<span class="getFeatureTitle">' + layerStateObject.getFeatureTitle + "</span>";
             	var tableText = '<table class="attributeInfo">';
@@ -495,10 +485,19 @@ org.OpenGeoPortal.MapController.prototype.wmsGetFeature = function(e){
             	}
             	var rawFeatures = response;//.getElementsByTagName("wfs:FeatureCollection");
             	var innerText = '';
-            	/*var featureLayer;
+            	
+            	/*
+            	//This doesn't work, since wms getFeatureInfo won't return gml in non-native projection
+            	//we can use wfs instead, but it is problematic with complex geometries
+            	//we can also use sld's but we don't really want to redraw the entire layer for each selection (very slow for large/complex layers)
+            	//a possible solution:  add an additional wms layer with an SLD that draws only the feature selected; but we will have to keep track of it
+            	
+            	var featureLayer;
             	//add or modify a layer with a vector representing the selected feature
             	if (this.map.getLayersByName("featureSelection").length > 0){
             		featureLayer = this.map.getLayersByName("featureSelection")[0];
+                    featureLayer.removeAllFeatures();
+
             	} else {
                     var style_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
                     style_blue.strokeColor = "blue";
@@ -508,29 +507,55 @@ org.OpenGeoPortal.MapController.prototype.wmsGetFeature = function(e){
                     style_blue.strokeWidth = 2;
                     style_blue.strokeLinecap = "butt";
                     style_blue.zIndex = 999999;
-            		featureLayer = new OpenLayers.Layer.Vector("featureSelection");//, {
-                   //     style: style_blue
-                    //});
+                    
+                    var styleMap = new OpenLayers.StyleMap({
+                        strokeColor: "blue",
+                        strokeWidth: 2,
+                        strokeOpacity: 0.5,
+                        fillColor: "blue",
+                        fillOpacity: 0.9
+                    });
+                    
+            		featureLayer = new OpenLayers.Layer.Vector("featureSelection",         
+            			{
+            			style: style_blue,
+                    	//styleMap: styleMap,
+                    	renderers: ["Canvas", "SVG", "VML"],
+                    	reportError: true
+            			}
+            		);
             	
             		this.map.addLayer(featureLayer);
             	}
-            	var options = {
-                        'featureType': "GISPORTAL.GISOWNER01.BOSTONINFRASTRUCTURE12",
-                        'featureNS': "http://geoserver.sf.net",
-                        'internalProjection': new OpenLayers.Projection("EPSG:900913"),
-                        'externalProjection': new OpenLayers.Projection("EPSG:2249")
-            	};
-                var format = new OpenLayers.Format.GML.v3(options);
-            	var features = format.read(rawFeatures);
+            	var features = null;
+            	try {
+                    var gmlOptions = {
+                            'internalProjection': this.map.baseLayer.projection,
+                            'externalProjection': this.map.baseLayer.projection
+                        }; 
+            		var format = new OpenLayers.Format.GML(gmlOptions);
+            		features = format.read(data);
+            	} catch (e){
+            		console.log(e);
+            	}
             	//console.log(features);
-                var vector = new OpenLayers.Feature.Vector(features.geometry);
-                //vector.bounds = this.map.getExtent();
-                this.map.testVector = vector;
-                featureLayer.removeAllFeatures();
-                featureLayer.addFeatures([vector]);
-                featureLayer.redraw();
-            	this.map.setLayerIndex(featureLayer, (this.map.layers.length -1));
+
+                if(features) {
+                    if(features.constructor != Array) {
+                        features = [features];
+                    }
+                }
+
+                try{
+                featureLayer.addFeatures(features);
+
+                } catch (e){
+                	console.log(e);
+                }
 				*/
+            	
+
+				
             	var linecount = 0;
             	//supports only one feature as is
             	jQuery(attributes).children().first().children().each(function(){
@@ -795,7 +820,7 @@ org.OpenGeoPortal.MapController.prototype.addWMSLayer = function (mapObj) {
     newLayer.events.register('loadend', newLayer, function() {org.OpenGeoPortal.Utility.hideLoadIndicator("mapLoadIndicator", newLayer.name);});
 	var that = this;
 	//we do a check to see if the layer exists before we add it
-	jQuery("body").bind(mapObj.layerName + 'Exists', function(){that.addLayer(newLayer);});
+	jQuery("body").bind(mapObj.layerName + 'Exists', function(){console.log(newLayer);that.addLayer(newLayer);});
 	this.layerExists(mapObj);
 };
 
@@ -868,6 +893,37 @@ org.OpenGeoPortal.MapController.prototype.addOverview = function() {
 
 };
 
+org.OpenGeoPortal.MapController.prototype.getWMSInfo = function(layerId){
+	var info = {};
+	var searchString = "OGPID=" + layerId;
+    var ajaxParams = {
+    		type: "GET",
+    		async: false,
+    		context: this,
+            url: 'info/wmsInfo',
+            data: searchString,
+            dataType: 'json',
+            success: function(data){
+            	info = data;
+            }
+    };
+    jQuery.ajax(ajaxParams);
+    return info;
+};
+
+org.OpenGeoPortal.MapController.prototype.getQualifiedLayerName = function(layerId, layerName){
+	if (layerName.indexOf(":") > 0){
+		return layerName;
+	} else {
+		var info = this.getWMSInfo(layerId);
+		if (typeof info.qualifiedName == "undefined"){
+			return layerName;
+		} else {
+			return info.qualifiedName;
+		}
+	}
+};
+
 org.OpenGeoPortal.MapController.prototype.changeStyle = function(layerID, dataType){
 	var layer = this.getLayersByName(layerID)[0];
 	if (typeof layer == 'undefined'){
@@ -878,6 +934,11 @@ org.OpenGeoPortal.MapController.prototype.changeStyle = function(layerID, dataTy
 	var layerStateObject = this.layerStateObject;
 	//we need this for now, since the tilecache name and geoserver name for layers is different for Harvard layers
 	var wmsName = layerStateObject.getState(layerID, "wmsName");
+	var qualName = this.getQualifiedLayerName(layerID, wmsName);
+	if (qualName != wmsName){
+		layerStateObject.setState(layerID, {"wmsName": qualName});
+		wmsName = qualName;
+	}
 	var location = layerStateObject.getState(layerID, "location");
 	//don't use a tilecache
 	layer.url = this.getPreviewUrlArray(location, false);

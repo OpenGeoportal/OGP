@@ -33,8 +33,40 @@ public class OgpFileUtils {
 	 * @throws IOException 
 	 */
 	public static File createNewFileFromDownload(String fileName, String mimeType, File directory) throws IOException{
+		String fileExtension = "";
+		String[] fileNameArr = fileName.split("\\.");
+		
+		if (fileNameArr.length > 1){
+			logger.info(fileNameArr[0]);
+			String temp = fileNameArr[fileNameArr.length -1];
+			if (temp.length() == 3){
+				//assume this is a file extension
+				fileExtension = "." + temp;
+				fileName = fileName.substring(0, fileName.indexOf(fileExtension));
+			}
+		}
+		logger.debug(fileName);
+
+		if (fileExtension.isEmpty()){
+			//try to get it from the mime type
+			fileExtension = getFileExtensionFromMimeType(mimeType);
+		}
 		fileName = OgpFileUtils.filterName(fileName);
-		String responseContentType = mimeType;
+		directory.mkdirs();
+		directory.mkdir();
+		File newFile = new File(directory, fileName + fileExtension);
+		int i = 1;
+		while (newFile.exists()){
+			newFile = new File(directory, fileName + "_" + i + fileExtension);
+			i++;
+		}
+		newFile.createNewFile();
+		logger.debug("New file path: " + newFile.getAbsolutePath());
+		return newFile;
+	}
+	
+	public static String getFileExtensionFromMimeType(String contentType){
+		String responseContentType = contentType.toLowerCase();
 		logger.info("response MIME-Type: " + responseContentType);
 		//get info from RequestedLayer object
 		if (responseContentType.indexOf(";") > -1){
@@ -47,7 +79,7 @@ public class OgpFileUtils {
 			fileExtension = ".html";
 		} else if (responseContentType.contains("application/zip")){
 			fileExtension = ".zip";
-		} else if (responseContentType.contains("image/tiff")){ 
+		} else if (responseContentType.contains("tiff")||responseContentType.contains("geotiff")){ 
 			fileExtension = ".tif";
 		} else if (responseContentType.contains("image/jpeg")){ 
 			fileExtension = ".jpg";
@@ -58,17 +90,7 @@ public class OgpFileUtils {
 		} else {
 			fileExtension = ".unk";
 		}
-		directory.mkdirs();
-		directory.mkdir();
-		File newFile = new File(directory, fileName + fileExtension);
-		int i = 1;
-		while (newFile.exists()){
-			newFile = new File(directory, fileName + "_" + i + fileExtension);
-			i++;
-		}
-		newFile.createNewFile();
-		logger.debug("New file path: " + newFile.getAbsolutePath());
-		return newFile;
+		return fileExtension;
 	}
 	
 	public static File createTempDir() {

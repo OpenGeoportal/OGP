@@ -21,6 +21,7 @@ package org.OpenGeoPortal.Proxy.Controllers;
 
 import org.OpenGeoPortal.Metadata.*;
 import org.OpenGeoPortal.Solr.*;
+import org.OpenGeoPortal.Utilities.ParseJSONSolrLocationField;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.AbortableHttpRequest;
@@ -149,7 +150,7 @@ public void doWfsDescribeFeatureType(@RequestParam("typeName") String layerIds, 
 	    // Make the Request
 	    //note: we won't transfer the protocol version because I'm not sure it would truly be compatible
 	try {
-		this.targetUri = new URI(layerInfoRetriever.getWFSUrl(solrRecord));
+		this.targetUri = new URI(ParseJSONSolrLocationField.getWmsUrl(solrRecord.getLocation()));
 	} catch (URISyntaxException e1) {
 		// TODO Auto-generated catch block
 		e1.printStackTrace();

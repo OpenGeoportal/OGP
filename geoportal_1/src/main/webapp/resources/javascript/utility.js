@@ -117,7 +117,12 @@ org.OpenGeoPortal.Utility.hexFromRGB = function(r, g, b) {
 };
 
 org.OpenGeoPortal.Utility.idEscape = function (domElementID) { 
-	   return domElementID.replace(/(:|\.)/g,'\\$1');
+	/*
+	 * ID and NAME tokens must begin with a letter ([A-Za-z]) and may be followed by any number of letters, digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
+	 * colons and periods are problematic for jQuery and css, so lets get rid of them as well
+	 */
+	  // return domElementID.replace(/([:|\.\/])/g,'\\$1');
+	return domElementID.replace(/([^A-Za-z0-9\-_])/g,'');
 };
 
 org.OpenGeoPortal.Utility.getMetadata = function (layerId){
