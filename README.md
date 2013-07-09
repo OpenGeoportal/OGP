@@ -13,7 +13,9 @@ The OpenGeoportal WAR file, a Solr 4.x WAR file, an OGP Solr schema, and Tomcat 
 A note on OS's:  Our development and production servers at Tufts both run Red Hat linux and have apache 2.x running in front.  However, I routinely run the OpenGeoportal code on MacOS 10.8 for my development work.  I don't know how the code runs under Windows or in other containers.
 
 ### Generating a WAR file ###
-Currently the only way to get a WAR file for the OpenGeoportal is to clone the project from github and generate one from a Maven build.  See the development docs for more information on how to do this.  Once you have a WAR file, it should run in Tomcat as is.  I tend to manually extract it in place with jar -xvf rather than letting Tomcat autodeploy.
+Currently the only way to get a WAR file for the OpenGeoportal is to clone/download the project from github and generate one from a Maven build.  The maven project has pretty straightforward documentation about how to do this: 
+http://maven.apache.org/run-maven/index.html  
+Once you have a WAR file, it should run in Tomcat as is.  I tend to manually extract it in place with jar -xvf rather than letting Tomcat autodeploy.
 
 ### A Note on Tomcat Configuration ###
 This is going to be system dependent, and likely, if you have sysadmins, they will have a preferred way of doing this.  My personal preference is to have separate Tomcat instances for Solr and the OpenGeoportal, and in fact, there is no necessity for them to even run on the same server.  
