@@ -112,18 +112,19 @@ public class HttpComponentsHttpRequester implements HttpRequester {
 		return sendRequest(serviceURL, requestString, requestMethod, "text/xml");
 	}
 
-	protected InputStream sendPostRequest(String serviceURL,
-			String requestBody, String contentType) {
+	protected InputStream sendPostRequest(String serviceURL, String requestBody, String contentType) {
 		HttpClient httpclient = ogpHttpClient.getHttpClient();
 		InputStream replyStream = null;
+
 		try {
 			HttpPost httppost = new HttpPost(serviceURL);
-			logger.debug(requestBody);
+			logger.info("Request body in sendPostRequest: " + requestBody);
 			StringEntity postEntity = new StringEntity(requestBody, ContentType.create(contentType, "UTF-8"));
 			httppost.setEntity(postEntity);
 			logger.info("executing POST request to " + httppost.getURI());
 			HttpResponse response = httpclient.execute(httppost);
 			this.setStatus(response.getStatusLine().getStatusCode());
+			logger.info("response in sendPostRequest: " + response.getStatusLine());
 			this.setHeaders(response.getAllHeaders());
 			HttpEntity entity = response.getEntity();
 			

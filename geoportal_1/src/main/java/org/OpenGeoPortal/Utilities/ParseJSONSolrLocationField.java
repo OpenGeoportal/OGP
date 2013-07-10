@@ -18,16 +18,21 @@ public final class ParseJSONSolrLocationField {
 	final static Logger logger = LoggerFactory.getLogger(ParseJSONSolrLocationField.class.getName());
 
 	public static String getWmsUrl(String locationField) throws JsonParseException{
+	    logger.info("Returning WmsUrl: " + parseLocationFromPath(locationField, "wms").get(0));
 		return parseLocationFromPath(locationField, "wms").get(0);
 
 	}
 	
 	public static String getTilecacheUrl(String locationField) throws JsonParseException{
+
 		return parseLocationFromPath(locationField, "tilecache").get(0);
 
 	}
 	
 	public static String getWfsUrl(String locationField) throws JsonParseException{
+
+	    logger.info("Returning WfsUrl: " + parseLocationFromPath(locationField, "wfs").get(0));
+
 		return parseLocationFromPath(locationField, "wfs").get(0);
 
 	}

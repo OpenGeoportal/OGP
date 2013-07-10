@@ -1,8 +1,16 @@
 package org.OpenGeoPortal.Ogc.Wfs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.OpenGeoPortal.Download.Types.BoundingBox;
 
 public class WfsGetFeature {
+
+    	final static Logger logger = LoggerFactory.getLogger(WfsGetFeature.class);
+
+
+
 	public static String createWfsGetFeatureRequest(String layerName, String workSpace, String nameSpace, String outputFormat, String filter) throws Exception {
 		return createWfsGetFeatureRequest(layerName, workSpace, nameSpace, -1, "", outputFormat, filter);
 		 
@@ -26,9 +34,23 @@ public class WfsGetFeature {
 	
 	public static String createWfsGetFeatureRequest(String layerName, String workSpace, String nameSpace, int maxFeatures, String epsgCode, String outputFormat, String filter) throws Exception {
 
-		//--generate POST message
-		//info needed: geometry column, bbox coords, epsg code, workspace & layername
+
+	    logger.info("In createWfsGetFeatureRequest passed in, layerName: " + layerName + ", workSpace: " + workSpace);
+
+
+	    //--generate POST message
+	    //info needed: geometry column, bbox coords, epsg code, workspace & layername
 		
+	    if (!workSpace.trim().isEmpty()){
+		if (layerName.contains(":")){
+		    layerName = layerName.substring(layerName.indexOf(":") + 1);
+		}
+		layerName = workSpace + ":" + layerName;
+	    } else {
+	    }
+
+
+	    /* old code
 		if (!workSpace.trim().isEmpty()){
 			layerName = workSpace + ":" + layerName;
 		} else {
@@ -36,11 +58,14 @@ public class WfsGetFeature {
 				layerName = layerName.substring(layerName.indexOf(":"));
 			}
 		}
+	    */
+		logger.info("In createWfsGetFeatureRequest converted, layerName: " + layerName); 
+
 		String getFeatureRequest = "<wfs:GetFeature service=\"WFS\" version=\"1.0.0\""
 			+ " outputFormat=\"" + outputFormat + "\""
 			+ getAttributeString("maxfeatures", maxFeatures)
 			+ getAttributeString("srsName", epsgCode)	
-			+ getNameSpaceString(workSpace, nameSpace)
+       			+ getNameSpaceString(workSpace, nameSpace)
   			+ " xmlns:wfs=\"http://www.opengis.net/wfs\""
   			+ " xmlns:ogc=\"http://www.opengis.net/ogc\""
   			+ " xmlns:gml=\"http://www.opengis.net/gml\""
@@ -51,6 +76,9 @@ public class WfsGetFeature {
   			+ filter
   			+ "</wfs:Query>"
 			+ "</wfs:GetFeature>";
+
+		logger.info("Feature Request: " + getFeatureRequest);
+
 
     	return getFeatureRequest;
 	}

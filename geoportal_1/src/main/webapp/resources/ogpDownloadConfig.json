@@ -3,7 +3,7 @@
 		"Tufts":[
 			{"classKey": "layerDownloader.wfs.proxied", "accessLevel":["restricted"],"dataType":["vector"], "outputFormats":["shp"]},
 			{"classKey": "layerDownloader.wcs.proxied", "accessLevel":["restricted"],"dataType":["raster", "paper map"],"outputFormats":["geotiff"]}],
-		"Berkeley":[{"classKey": "layerDownloader.kml", "accessLevel":["public"],"dataType":["vector", "raster"], "outputFormats":["kml", "kmz"], "params":{"serviceAddress": "http://gis.lib.berkeley.edu:8080/geoserver/wms/kml"}},
+		"Berkeley":[{"classKey": "layerDownloader.kml", "accessLevel":["public"],"dataType":["vector", "raster"], "outputFormats":["kml", "kmz"], "params":{"serviceAddress": "http://gis.lib.berkeley.edu:8080/geoserver/wms/kml"}}],
 		"Harvard":[
 			{"classKey": "layerDownloader.email.HGL", "accessLevel":["public","restricted"],"dataType":["raster","paper map"],"outputFormats":["geotiff"]}],
 		"MassGIS":[

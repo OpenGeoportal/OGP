@@ -43,6 +43,8 @@ public class WfsDownloadMethod extends AbstractDownloadMethod implements PerLaye
 		//info needed: geometry column, bbox coords, epsg code, workspace & layername
 	 	//all client bboxes should be passed as lat-lon coords.  we will need to get the appropriate epsg code for the layer 
 	 	//in order to return the file in original projection to the user (will also need to transform the bbox)
+
+	    logger.info("Layer name in WfsDownloadMethod: " + this.currentLayer.getLayerNameNS());
 		String layerName = this.currentLayer.getLayerNameNS();
 		SolrRecord layerInfo = this.currentLayer.getLayerInfo();
 		BoundingBox nativeBounds = new BoundingBox(layerInfo.getMinX(), layerInfo.getMinY(), layerInfo.getMaxX(), layerInfo.getMaxY());
