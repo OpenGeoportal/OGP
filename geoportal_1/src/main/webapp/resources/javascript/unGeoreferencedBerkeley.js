@@ -20,7 +20,7 @@ if (typeof org.OpenGeoPortal == 'undefined'){
  */
 org.OpenGeoPortal.unGeoreferenced = {
 
-    constructNGURL: function(fileName, location) {
+    constructUGURL: function(fileName, location) {
 
         return location.imageCollection[0].url + "?service=WMS&version=1.1.0&request=GetMap&layers=" + location.imageCollection[0].collection + "&CQL_FILTER=PATH=%27" + location.imageCollection[0].path + "/" + fileName + "%27&styles=&bbox=0.0,-65536.0,65536.0,0.0&width=512&height=512&srs=EPSG:404000&format=application/openlayers";
     },
@@ -79,7 +79,7 @@ http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms?service=WMS&version=1.1.
 	Here is what we get:
 	fileName: 17076013_07_072a.tif
 	location:
-{"imageCollection": [{"collection": "UCB:images", "path": "furtwangler", "url": "http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms", collectionurl: "http://www.lib.berkeley.edu/EART/mapviewer/collections/histoposf/"}]}
+{"imageCollection": {"collection": "UCB:images", "path": "furtwangler", "url": "http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms", collectionurl: "http://www.lib.berkeley.edu/EART/mapviewer/collections/histoposf/"}}
 
 So:
 */

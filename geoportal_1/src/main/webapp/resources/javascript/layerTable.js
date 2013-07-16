@@ -973,6 +973,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	            var layerID = aData[this.tableHeadingsObj.getColumnIndex("LayerId")];
 	            //var layerID = org.OpenGeoPortal.Utility.idEscape(aData[this.tableHeadingsObj.getColumnIndex("LayerId")]);
 
+
       	    	var dataType = aData[this.tableHeadingsObj.getColumnIndex("DataType")];
             	var access = aData[this.tableHeadingsObj.getColumnIndex("Access")];
             	var institution = aData[this.tableHeadingsObj.getColumnIndex("Institution")];
