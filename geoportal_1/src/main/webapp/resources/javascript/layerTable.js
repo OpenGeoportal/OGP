@@ -920,8 +920,8 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	  this.previewedLayers = org.OpenGeoPortal.PreviewedLayers;
 	 
 	  this.addToPreviewedLayers = function(tableRow){
-		  var tableObj = this.getTableObj();
-          var rowData = tableObj.fnGetData(tableRow[0]);
+		var tableObj = this.getTableObj();
+          	var rowData = tableObj.fnGetData(tableRow[0]);
 		this.previewedLayers.addLayer(rowData);
 		function callback() {
 			if (that.getTableID() == "searchResults"){
@@ -960,7 +960,7 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	  this.previewLayer = function(thisObj){
 		  //debug
 		  //try{
-		  	var tableElement = jQuery(thisObj).closest('tr');
+		var tableElement = jQuery(thisObj).closest('tr');
 	        var tableObj = this.getTableObj();	 
 	        var showLayerText = "Preview layer on the map";
 	        var hideLayerText = "Turn off layer preview on the map";
@@ -977,6 +977,9 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
       	    	var dataType = aData[this.tableHeadingsObj.getColumnIndex("DataType")];
             	var access = aData[this.tableHeadingsObj.getColumnIndex("Access")];
             	var institution = aData[this.tableHeadingsObj.getColumnIndex("Institution")];
+	        var collectionId = aData[this.tableHeadingsObj.getColumnIndex("CollectionId")];
+	        var workspaceName = aData[this.tableHeadingsObj.getColumnIndex("WorkspaceName")];
+            	var georeferenced = aData[this.tableHeadingsObj.getColumnIndex("GeoReferenced")];
             	var minLatitude = aData[this.tableHeadingsObj.getColumnIndex("MinY")];
             	var maxLatitude = aData[this.tableHeadingsObj.getColumnIndex("MaxY")];
             	var minLongitude = aData[this.tableHeadingsObj.getColumnIndex("MinX")];
@@ -993,87 +996,97 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
             	} catch (err){
             		 new org.OpenGeoPortal.ErrorObject(err,'Preview parameters are invalid.  Unable to Preview layer "' + aData[this.tableHeadingsObj.getColumnIndex("LayerDisplayName")] +'"');
             	}
-            	var georeferenced = aData[this.tableHeadingsObj.getColumnIndex("GeoReferenced")];
 
             	//check for a proxy here
             	var proxy = org.OpenGeoPortal.InstitutionInfo.getWMSProxy(institution, access);
             	if (proxy){
             		location.wmsProxy = proxy;
             	}
-	      	    if (!layerState.layerStateDefined(layerID)){
+	      	if (!layerState.layerStateDefined(layerID)){
+
+			//alert("layer state was not defined for layerId: " + layerID + ", dataType: " + dataType);
+
 	    	        layerState.addNewLayer(layerID, {"dataType": dataType});
-	      	    }
-	    	    layerState.setState(layerID, {"location": location});
-	    	    layerState.setState(layerID, {"bbox": bbox});
+	      	}
+	    	layerState.setState(layerID, {"location": location});
+	    	layerState.setState(layerID, {"bbox": bbox});
 	      	    
 	      	    
 
-	            //check to see if layer is on openlayers map, if so, show layer
-	            var opacitySetting = layerState.getState(layerID, "opacity");
-	            if (org.OpenGeoPortal.map.getLayersByName(layerID)[0]){
-	            	console.log("layer match");
-	            	console.log(layerID);
-	            	org.OpenGeoPortal.map.showLayer(layerID);
-	            	org.OpenGeoPortal.map.getLayersByName(layerID)[0].setOpacity(opacitySetting * .01);
-		            jQuery(thisObj).attr('title', hideLayerText);
-		            layerState.setState(layerID, {"preview": "on"});
-	            } else{
-	            	//use switching logic here to allow other types of layer preview besides wms
+	        //check to see if layer is on openlayers map, if so, show layer
+	        var opacitySetting = layerState.getState(layerID, "opacity");
+	        if (org.OpenGeoPortal.map.getLayersByName(layerID)[0]){
+	            console.log("layer match");
+	            console.log(layerID);
+	            org.OpenGeoPortal.map.showLayer(layerID);
+	            org.OpenGeoPortal.map.getLayersByName(layerID)[0].setOpacity(opacitySetting * .01);
+		    jQuery(thisObj).attr('title', hideLayerText);
+		    layerState.setState(layerID, {"preview": "on"});
+	        } else{
+	            //use switching logic here to allow other types of layer preview besides wms
 
-	            	var layerName = aData[this.tableHeadingsObj.getColumnIndex("Name")];
-	            	var wmsNamespace = aData[this.tableHeadingsObj.getColumnIndex("WorkspaceName")];
-	            	var availability = aData[this.tableHeadingsObj.getColumnIndex("Availability")];
-	            	/*if (!georeferenced){
-	            		//code to handle ungeoreferenced layers
-	            	}*/
-	            	var mapObj = {"institution": institution, "layerName": layerName, "title": layerID, 
+	            var layerName = aData[this.tableHeadingsObj.getColumnIndex("Name")];
+	            var wmsNamespace = aData[this.tableHeadingsObj.getColumnIndex("WorkspaceName")];
+	            var availability = aData[this.tableHeadingsObj.getColumnIndex("Availability")];
+	            var mapObj = {"institution": institution, "layerName": layerName, "title": layerID, 
 	            			"bbox": bbox, "dataType": dataType, "opacity": opacitySetting *.01, "access": access, "location": location};
-            		//should have some sort of method to determine preview type based on location field
-	            	if (availability.toLowerCase() == "offline"){
-	            		//try to preview bounds
-	            		//console.log(mapObj);
-            			org.OpenGeoPortal.map.addMapBBox(mapObj);
-            			layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
-	            	} else {
-	            		if (typeof location.wms != "undefined"){
-	            			if ((wmsNamespace.length > 0)
-	            				&&(layerName.indexOf(":") == -1)){
-	            				layerName = wmsNamespace + ":" + layerName;
-	            			}
-	            			mapObj.layerName = layerName;
-	            			org.OpenGeoPortal.map.addWMSLayer(mapObj);
-	            			//this should be triggered when layer load is complete
-	            			jQuery(thisObj).attr('title', hideLayerText);
-	            			layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
-	            		} else if (typeof location.ArcGISRest != "undefined"){
-							org.OpenGeoPortal.map.addArcGISRestLayer({"institution": institution, "layerName": layerName, "title": layerID, 
-		            			"west": minLongitude, "south": minLatitude, "east": maxLongitude, "north": maxLatitude, 
-		            			"dataType": dataType, "opacity": opacitySetting *.01, "access": access, "location": location});
-		            		//this should be triggered when layer load is complete
-		            		jQuery(thisObj).attr('title', hideLayerText);
-		            		layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
-						} else {
-	            			throw new Error("This layer is currently not previewable.");
+            	    //should have some sort of method to determine preview type based on location field
+	            if (availability.toLowerCase() == "offline"){
+	            	//try to preview bounds
+	            	//console.log(mapObj);
+            		org.OpenGeoPortal.map.addMapBBox(mapObj);
+            		layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
+	            } else {
+	            	if (typeof location.wms != "undefined"){
+	            		if ((wmsNamespace.length > 0) &&(layerName.indexOf(":") == -1)){
+	            		    layerName = wmsNamespace + ":" + layerName;
 	            		}
-	            	} 
-	            }
-	            this.addToPreviewedLayers(tableElement);
-	            analytics.track("Layer Previewed", institution, layerID);
-	            //console.log(this);
-	        } else {
-	        	try {
-	        		//Get the data array for this row
-	        		var aData = tableObj.fnGetData(tableElement[0]);
-	        		var index = this.tableHeadingsObj.getColumnIndex("LayerId");
-	        		var layerID = aData[index];
-	        		//layer id is being used as the openlayers layer name
-	        		org.OpenGeoPortal.map.hideLayer(layerID);
-	        		jQuery(thisObj).attr('title', showLayerText);
-	        		layerState.setState(layerID, {"preview": "off"});
-	       		 	this.previewedLayers.removeLayer(layerID, index);
-	        	} catch (err) {new org.OpenGeoPortal.ErrorObject(err, "Error turning off preview.");};
+	            		mapObj.layerName = layerName;
+	            		org.OpenGeoPortal.map.addWMSLayer(mapObj);
+	            		//this should be triggered when layer load is complete
+	            		jQuery(thisObj).attr('title', hideLayerText);
+	            		layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
 
+			} else if (typeof location.imageCollection != "undefined") {
+
+	
+               		    //code to handle ungeoreferenced layers
+			    layerState.setState(layerID, { "preview": "on" });
+//			    alert("Calling unGeoreferenced.init");			
+			    org.OpenGeoPortal.unGeoreferenced.init(layerID, location, workspaceName, collectionId);
+//			    alert("Calling unGeoreferenced.previewUG");
+//			    alert("baseUrl in layerTable: " + org.OpenGeoPortal.unGeoreferenced.getBaseUrl());
+			    org.OpenGeoPortal.unGeoreferenced.previewUG();
+					
+
+
+	            	} else if (typeof location.ArcGISRest != "undefined"){
+			    org.OpenGeoPortal.map.addArcGISRestLayer({"institution": institution, "layerName": layerName, "title": layerID, "west": minLongitude, "south": minLatitude, "east": maxLongitude, "north": maxLatitude, "dataType": dataType, "opacity": opacitySetting *.01, "access": access, "location": location});
+		            //this should be triggered when layer load is complete
+		            jQuery(thisObj).attr('title', hideLayerText);
+		            layerState.setState(layerID, {"preview": "on", "dataType": dataType, "wmsName": layerName});
+			} else {
+	            	    throw new Error("This layer is currently not previewable.");
+	            	}
+	            } 
 	        }
+	        this.addToPreviewedLayers(tableElement);
+	        analytics.track("Layer Previewed", institution, layerID);
+	            //console.log(this);
+	    } else {
+	       	try {
+	            //Get the data array for this row
+	            var aData = tableObj.fnGetData(tableElement[0]);
+	            var index = this.tableHeadingsObj.getColumnIndex("LayerId");
+	            var layerID = aData[index];
+	            //layer id is being used as the openlayers layer name
+	            org.OpenGeoPortal.map.hideLayer(layerID);
+	            jQuery(thisObj).attr('title', showLayerText);
+	            layerState.setState(layerID, {"preview": "off"});
+	       	    this.previewedLayers.removeLayer(layerID, index);
+	        } catch (err) {new org.OpenGeoPortal.ErrorObject(err, "Error turning off preview.");};
+
+	    }
       	//} catch (err) {new org.OpenGeoPortal.ErrorObject(err, "");};
 	  };
 	  
@@ -2345,7 +2358,11 @@ org.OpenGeoPortal.LayerTable.TableHeadings = function(thisObj){
 		     "GeoReferenced": {"ajax": true, "resizable": false, "organize": false, "columnConfig": 
 		            	{"sName": "GeoReferenced", "sTitle": "Georeferenced", "bVisible": false, "aTargets": [ 21 ], "bSortable": false}},
 		   	 "Availability": {"ajax": true, "resizable": false, "organize": false, "columnConfig": 
-		            	{"sName": "Availability", "sTitle": "Availability", "bVisible": false, "aTargets": [ 22 ], "bSortable": false}}
+		            	{"sName": "Availability", "sTitle": "Availability", "bVisible": false, "aTargets": [ 22 ], "bSortable": false}},
+			 "CollectionId": {"ajax": true, "resizable": false, "organize": false, "columnConfig":
+                                {"sName": "CollectionId", "sTitle": "Collection Id", "bVisible": false, "aTargets": [ 23 ], "bSortable": false}}
+
+
 			};
 	//this should be a function, so some params can be set on init
 	//fnRender functions and targets should be generated on init

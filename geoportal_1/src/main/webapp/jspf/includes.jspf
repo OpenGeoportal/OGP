@@ -19,6 +19,7 @@
 <script type="text/javascript" src="resources/javascript/analytics.js"></script>
 <script type="text/javascript" src="resources/javascript/mapDiv.js"></script>
 <script type="text/javascript" src="resources/javascript/layerSettings.js"></script>
+<script type="text/javascript" src="resources/javascript/unGeoreferencedBerkeley.js"></script>
 <script type="text/javascript" src="resources/javascript/layerTable.js"></script>
 <script type="text/javascript" src="resources/javascript/login.js"></script>
 <script type="text/javascript" src="resources/javascript/userInterface.js"></script>

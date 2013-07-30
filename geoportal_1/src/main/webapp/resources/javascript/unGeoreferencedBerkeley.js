@@ -11,65 +11,211 @@ if (typeof org.OpenGeoPortal == 'undefined'){
     throw new Error("org.OpenGeoPortal already exists and is not an object");
 }
 
-/**
- * LayerTable constructor
- * this object defines the behavior of the search results table, as well as the saved layers table
- * 
- *  @param userDiv  the id of the div element to place the table in
- *  @param tableName the id of the actual table element
- */
 org.OpenGeoPortal.unGeoreferenced = {
 
-    constructUGURL: function(fileName, location) {
-
-        return location.imageCollection[0].url + "?service=WMS&version=1.1.0&request=GetMap&layers=" + location.imageCollection[0].collection + "&CQL_FILTER=PATH=%27" + location.imageCollection[0].path + "/" + fileName + "%27&styles=&bbox=0.0,-65536.0,65536.0,0.0&width=512&height=512&srs=EPSG:404000&format=application/openlayers";
-    },
-
-    previewNG: function(layerID, fileName, location) {
-
-	var imageURL = this.constructNGURL(fileName, location);
-	var frameName = "IFrame_" + fileName;
-
-
-	var shutDownScript = '<script type="text/javascript" src="javascript/jquery/js/jquery-1.6.4.min.js"></script> ';
-
-	shutDownScript += '<script type="text/javascript"> ';
-	shutDownScript += 'function shutdown() {';
-	shutDownScript += 'opener.org.OpenGeoPortal.layerState.setState(' + layerID + ', {"preview":"off"});';
-	shutDownScript += 'opener.org.OpenGeoPortal.previewWindows.deleteLayer(' + layerID + ');'
-	shutDownScript += ' }';
-	shutDownScript += ' window.onbeforeunload = shutdown;' ;
-
-	shutDownScript += '</script>';
+	gssURL: 'http://linuxdev.lib.berkeley.edu:8080/newOGP/gss',
+	baseURL: null,
+	image_points: { maxx: null, maxy: null, minx: null, miny: null },
+	layers: null,
+	myLocation: null,
+	CQL: null,
+	coda: null,
+	layerId: null,
+	workspaceName: null,
 
 
+	success: function(data, status, jqXHR) {
+//	alert("data in success: " + data);
+	    try {
+//	        var stuff = jQuery.parseJSON(data);
+	        alert("data.maxx: " + data.maxx);
+		alert("this.image_points: " + this.image_points);
 
-	var frameContent = '<html><head>' +
-	    ' <script src="javascript/openlayers/OpenLayers-2.13.1/OpenLayers.debug.js"></script> ' + 
-	    ' <script type="text/javascript"> ' +
-	    ' 
-	    shutDownScript + 
-	    '</head><body><table><tr><td>' +
-	    '<iframe  id="' + frameName + '"  frameborder="0"  vspace="0" ' +
- 	    'hspace="0"  marginwidth="2"  marginheight="2" width="700"  ' +
-	    'height="600"  src="' + imageURL + '"></iframe></td></tr>' +
-	    '<tr><td>You are previewing an ungeoreferenced image, which cannot be displayed on the map.<br /> Move the image into the center of the window before zooming.</td></tr><tr><td>To see this image in its collection, see <a href="' + 
-location.imageCollection[0].collectionurl + '">' + 
-location.imageCollection[0].collectionurl + 
-'</td></tr></table><button onClick="shutdown();">Shutdown</button></body></html>';
+	        this.image_points.maxx = data.maxx;
+	        this.image_points.maxy = data.maxy;
+	        this.image_points.minx = data.minx;
+	        this.image_points.miny = data.miny;
+	    } catch(e) {
+	        alert(e);
+	    }
+	    alert("image_points in success: " + this.image_points);
+	    alert("image_points.maxx in success: " + this.image_points.maxx);
+        },
+
+	test_message: null,
 
 
-	var w = window.open("", "_blank", "width=800,height=800,status=yes,resizable=yes");
+	init: function(layerID, loc, workspaceName, collectionId) {
 
-	w.document.write(frameContent);
+//    	    alert("org.OpenGeoPortal.unGeoreferenced.init called");
 
-	var ret = function() { w.close(); }
-	return ret;
+	    var that = this;
+		
+            /* Ajax call to gss for image size */
+            jQuery.ajax({
+		 url: that.gssURL + "?file_path=" + loc.imageCollection.path,
+		 data: null,
+		 context: that,
+		 success: that.success,
+		 datatype: "json"}
+            );
 
-    }
+//            alert("After ajax call");
+//	    alert("Passed layerID: " + layerID);  
 
+
+  	    this.layerId = layerID;
+    	    this.myLocation = loc;
+    	    this.workspaceName = workspaceName;
+    	    this.baseURL = loc.imageCollection.url;
+    	    this.layers = workspaceName + ":" + collectionId;
+    	    this.CQL = 'PATH=%27' + loc.imageCollection.path + '%27';
+    	    this.coda = 'srs=EPSG:404000&format=image/jpeg';
+    	    this.test_message = "set in init";
+
+//    	    alert("layerId: " + this.layerId);
+//    	    alert("baseURL: " + this.baseURL);
+
+
+  	},
+
+	getValues: function() { 
+	    return this.collectValues.call(this); 
+	},
+
+	test: function() { 
+	    return this.test_message;
+        },
+
+
+	collectValues: function() {
+
+/*
+	    alert("Message from collectValues: " + this.test_message);
+*/
+	
+	    alert("image_size in collectValues: " + this.image_points);
+	    alert("baseURL in collectValues: " + this.baseURL);
+	    alert("layers in collectValues: " + this.layers);
+	    alert("CQL in collectValues: " + this.CQL);
+	    alert("coda in collectValues: " + this.coda);
+
+
+	    return { image_points: this.image_points,
+	             baseURL: this.baseURL,
+	             layers: this.layers,
+	             CQL: this.CQL,
+	             coda: this.coda,
+		     collectionurl: this.myLocation.imageCollection.collectionurl 
+	           };
+       },
+	
+       previewUG: function() {
+
+
+//         var imageURL = this.constructNGURL(location, workspaceName, collectionId);
+
+   	    var noid = this.layerId;
+            if(noid.substr("/") != -1) { noid = noid.substr(noid.indexOf("/")); }
+    	    var frameName = "IFrame_" + noid;
+
+
+
+/*
+    alert("image_points.maxx: " + this.image_points.maxx); 
+    alert("baseURL: " + org.OpenGeoPortal.unGeoreferenced.baseURL);
+    alert("layers: " + org.OpenGeoPortal.unGeoreferenced.layers); 
+    alert("CQL: " + org.OpenGeoPortal.unGeoreferenced.CQL); 
+    alert("coda: " + org.OpenGeoPortal.unGeoreferenced.coda); 
+    alert("collectionurl: " + org.OpenGeoPortal.unGeoreferenced.myLocation.imageCollection.collectionurl); 
+*/
+
+            var w = window.open("resources/frameContent.html", 
+			        "_blank", 
+				"width=800,height=800,status=yes,resizable=yes");
+
+            alert("Calling test");
+            w.test();
+
+            var ret = function() { w.close(); }
+            return ret;
+
+  }
 };
 
+
+/*
+
+http://gis.lib.berkeley.edu:8080/geoserver/wms?version=1.1.0&request=GetMap&layers=UCB:images&CQL_FILTER=PATH=%27furtwangler/17076013_03_028a.tif%27&bbox=0.0,-8566.0,6215.0,0.0&width=6215&height=8566&srs=EPSG:404000&format=image/jpeg
+
+This works better.
+*/
+
+
+/*
+
+        return location.imageCollection.url + 
+	"?version=1.1.0&request=GetMap&layers=" + 
+	workSpaceName + ":" + collectionId +  
+	"&CQL_FILTER=PATH=%27" + 
+	location.imageCollection.path + 
+	"%27&styles=&bbox=" + 
+	image_size.minx + ", " + 
+	image_size.miny + ", " + 
+	image_size.maxx + ", " +
+	image_size.maxy + 
+	"&width=" + maxx +
+	"&height=" + abs(image_size.miny) +
+	"&srs=EPSG:404000&format=image/jpeg";
+    },
+
+
+	    '<iframe  id="' + frameName + '"  frameborder="0"  vspace="0" ' +
+ 	    'hspace="0"  marginwidth="2"  marginheight="2" width="700"  ' +
+	    'height="600"  src="' + imageURL + '"></iframe>
+
+*/
+
+/*
+
+    var windowScript = '<script type="text/javascript"> ';
+    windowScript += 'var map; var image; ';
+    windowScript += 'OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5; ';
+
+// make OL compute scale according to WMS spec
+    windowScript += 'OpenLayers.DOTS_PER_INCH = 25.4 / 0.28; ';
+    windowScript += 'function UGOLinit(image_size, baseURL, layers, CQL, coda) { ';
+    windowScript += 'var bounds = new OpenLayers.Bounds(0, image_size.miny, image_size.maxx, 0); ';
+    windowScript += 'var options = { controls: [], maxExtent: bounds, maxResolution: 32, numZoomLevels: 6, projection: "EPSG:404000", units: "m", allowOverlays: true }; ';
+    windowScript += 'map = new OpenLayers.Map("map", options); ';
+    windowScript += 'alert("In UGOLinit, image_size: " + image_size); alert("In UGOLinit, baseURL: " + baseURL); alert("In UGOLinit, layers: " + layers); alert("In UGOLinit, CQL: " + CQL); alert("In UGOLinit, coda: " + coda);';
+    windowScript += 'image = new OpenLayers.Layer.WMS( "UCB:images - Tiled", baseURL, {CQL_FILTER: CQL, LAYERS: layers, STYLES: "", format: "image/jpeg", palette: "safe", tiled: true, tilesOrigin : map.maxExtent.left + ", " + map.maxExtent.bottom, version: "1.1.0", bbox: image_size.minx + ", " + image_size.miny + ", " + image_size.maxx + ", " + image_size.maxy, width: image_size.maxx, height: Math.abs(image_size.miny), srs: "EPSG:404000"}, { buffer: 0, displayOutsideMaxExtent: true, isBaseLayer: true } );';
+   windowScript += 'map.addLayers(image); map.zoomToMaxExtent(); } </script>';
+
+
+    var shutDownScript = '<script type="text/javascript"> ';
+    shutDownScript += 'function shutdown() {';
+    shutDownScript += 'opener.org.OpenGeoPortal.layerState.setState(' + this.layerID + ', {"preview":"off"});';
+    shutDownScript += 'opener.org.OpenGeoPortal.previewWindows.deleteLayer(' + this.layerID + ');'
+    shutDownScript += ' }';
+    shutDownScript += ' window.onbeforeunload = shutdown;';
+    shutDownScript += '</script>';
+
+    var frameContent = '<html><head>' +
+	               '<script type="text/javascript" src="javascript/jquery/js/jquery-1.6.4.min.js"></script> ' +
+	               ' <script type="text/javascript" src="javascript/openlayers/OpenLayers-2.13.1/OpenLayers.debug.js"></script> ' + 
+	               windowScript + shutDownScript + 
+		       '<script type="text/javascript">$jQuery.ready(UGOLinit(this.image_size, this.baseURL, this.layers, this.CQL, this.coda);</script> ' +
+	               '</head>' + 
+	               '<body>' +
+	               '<table><tr><td><div id="map"></div></td></tr>' +
+	               '<tr><td>You are previewing an ungeoreferenced image, which cannot be displayed on the map.<br /> Move the image into the center of the window before zooming.</td></tr><tr><td>To see this image in its collection, see <a href="' + 
+                       this.location.imageCollection.collectionurl + '">' + 
+                       this.location.imageCollection.collectionurl + 
+                       '</td></tr></table><button onClick="shutdown();">Shutdown</button></body></html>';
+
+
+*/
 
 /* Non-georeferenced handling */
 /*
@@ -79,7 +225,7 @@ http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms?service=WMS&version=1.1.
 	Here is what we get:
 	fileName: 17076013_07_072a.tif
 	location:
-{"imageCollection": {"collection": "UCB:images", "path": "furtwangler", "url": "http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms", collectionurl: "http://www.lib.berkeley.edu/EART/mapviewer/collections/histoposf/"}}
+{"imageCollection": {"path": "furtwangler/17076013_07_072a.tif", "url": "http://linuxdev.lib.berkeley.edu:8080/geoserver/UCB/wms", collectionurl: "http://www.lib.berkeley.edu/EART/mapviewer/collections/histoposf/"}}
 
 So:
 */

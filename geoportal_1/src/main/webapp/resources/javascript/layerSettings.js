@@ -41,7 +41,11 @@ org.OpenGeoPortal.LayerSettings = function(){
 	};
 	
 	this.addNewLayer = function(layerID, params){
+
+		//alert("addNewLayer called. layerId: " + layerID + ", dataType: " + params.dataType );
+
 		var dataType = params.dataType;
+
 
 		if ((typeof dataType == 'undefined')||(dataType == '')){
 			throw new Error("dataType (Point, Line, Polygon, or Raster) must be specified to create a new layer.");
