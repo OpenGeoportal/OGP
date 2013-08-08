@@ -13,9 +13,9 @@ if (typeof org.OpenGeoPortal == 'undefined'){
 
 org.OpenGeoPortal.unGeoreferenced = {
 
-	gssURL: 'http://linuxdev.lib.berkeley.edu:8080/newOGP/gss',
 	baseURL: null,
-	image_points: { maxx: null, maxy: null, minx: null, miny: null },
+	layerState: null,
+	index: null,
 	layers: null,
 	myLocation: null,
 	CQL: null,
@@ -24,52 +24,27 @@ org.OpenGeoPortal.unGeoreferenced = {
 	workspaceName: null,
 
 
-	success: function(data, status, jqXHR) {
-//	alert("data in success: " + data);
-	    try {
-//	        var stuff = jQuery.parseJSON(data);
-	        alert("data.maxx: " + data.maxx);
-		alert("this.image_points: " + this.image_points);
-
-	        this.image_points.maxx = data.maxx;
-	        this.image_points.maxy = data.maxy;
-	        this.image_points.minx = data.minx;
-	        this.image_points.miny = data.miny;
-	    } catch(e) {
-	        alert(e);
-	    }
-	    alert("image_points in success: " + this.image_points);
-	    alert("image_points.maxx in success: " + this.image_points.maxx);
-        },
-
 	test_message: null,
 
 
-	init: function(layerID, loc, workspaceName, collectionId) {
+	init: function(layerState, layerID, index, loc, workspaceName, collectionId) {
 
 //    	    alert("org.OpenGeoPortal.unGeoreferenced.init called");
 
 	    var that = this;
 		
-            /* Ajax call to gss for image size */
-            jQuery.ajax({
-		 url: that.gssURL + "?file_path=" + loc.imageCollection.path,
-		 data: null,
-		 context: that,
-		 success: that.success,
-		 datatype: "json"}
-            );
-
 //            alert("After ajax call");
 //	    alert("Passed layerID: " + layerID);  
 
 
+	    this.layerState = layerState;
   	    this.layerId = layerID;
+	    this.index = index;
     	    this.myLocation = loc;
     	    this.workspaceName = workspaceName;
     	    this.baseURL = loc.imageCollection.url;
     	    this.layers = workspaceName + ":" + collectionId;
-    	    this.CQL = 'PATH=%27' + loc.imageCollection.path + '%27';
+    	    this.CQL = "PATH='" + loc.imageCollection.path + "'";
     	    this.coda = 'srs=EPSG:404000&format=image/jpeg';
     	    this.test_message = "set in init";
 
@@ -92,17 +67,19 @@ org.OpenGeoPortal.unGeoreferenced = {
 
 /*
 	    alert("Message from collectValues: " + this.test_message);
-*/
 	
-	    alert("image_size in collectValues: " + this.image_points);
 	    alert("baseURL in collectValues: " + this.baseURL);
 	    alert("layers in collectValues: " + this.layers);
 	    alert("CQL in collectValues: " + this.CQL);
 	    alert("coda in collectValues: " + this.coda);
+*/
 
 
-	    return { image_points: this.image_points,
-	             baseURL: this.baseURL,
+	    return { layerState: this.layerState,
+		     layerId: this.layerId,
+		     index: this.index,
+	             location: this.myLocation,
+		     baseURL: this.baseURL,
 	             layers: this.layers,
 	             CQL: this.CQL,
 	             coda: this.coda,
@@ -134,11 +111,12 @@ org.OpenGeoPortal.unGeoreferenced = {
 			        "_blank", 
 				"width=800,height=800,status=yes,resizable=yes");
 
+/*
             alert("Calling test");
             w.test();
-
             var ret = function() { w.close(); }
-            return ret;
+*/
+            return w;
 
   }
 };

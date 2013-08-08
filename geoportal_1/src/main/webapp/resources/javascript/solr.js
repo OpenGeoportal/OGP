@@ -1217,7 +1217,7 @@ org.OpenGeoPortal.Solr.prototype.getReturnedColumnsClause = function getReturned
 		returnedColumns = "fl=";
 	else if (requestType == org.OpenGeoPortal.Solr.prototype.SearchRequest)
 		returnedColumns = "fl=Name,Institution,Access,DataType,LayerDisplayName,Publisher,GeoReferenced" +
-						  ",Originator,Location,MinX,MaxX,MinY,MaxY,ContentDate,LayerId,score,WorkspaceName";
+						  ",Originator,Location,MinX,MaxX,MinY,MaxY,ContentDate,LayerId,score,WorkspaceName, CollectionId";
 	else
 		returnedColumns = "error in org.OpenGeoPortal.Solr.prototype.getReturnedColumnsClause" +
 						  " did not understand passed requestType " + requestType;
@@ -1347,6 +1347,7 @@ org.OpenGeoPortal.Solr.prototype.getSearchQuery = function getSearchQuery()
 
 	var query = "q=" + queryClause + "&debugQuery=false&" + extras; //spatialFilter + "&" + returnType + "&" + returnedColumns;
 	//foo = query;
+
 	return query;
 };	
 

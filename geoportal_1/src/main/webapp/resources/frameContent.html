@@ -1,0 +1,266 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+ <html>
+    <head>
+
+        <title>UnGeoreferenced Image Preview</title>
+
+	<link rel="stylesheet" href="javascript/openlayers/OpenLayers-2.12/theme/default/style.css" type="text/css" />
+
+        <script type="text/javascript" src="javascript/jquery/js/jquery-1.6.4.min.js"></script>
+	<script type="text/javascript" src="javascript/openlayers/OpenLayers-2.12/OpenLayers.debug.js"></script>
+<!--
+
+	<script type="text/javascript" src="javascript/unGeoreferencedBerkeley.js"></script>
+-->
+        <script type="text/javascript">
+
+	if (typeof org == 'undefined'){ 
+	    org = {};
+	} else if (typeof org != "object"){
+	    throw new Error("org already exists and is not an object");
+	}
+
+	// Repeat the creation and type-checking code for the next level
+	if (typeof org.OpenGeoPortal == 'undefined'){
+	    org.OpenGeoPortal = {};
+	} else if (typeof org.OpenGeoPortal != "object"){
+            throw new Error("org.OpenGeoPortal already exists and is not an object");
+        }
+
+	org.OpenGeoPortal.unGeoreferencedHelper = {
+
+	    gssURL: 'http://linuxdev.lib.berkeley.edu:8080/newOGP/gss',
+	    baseURL: null,
+	    layerState: null,
+	    index: null,
+	    myLocation: null,
+	    layers: null,
+	    CQL: null,
+	    coda: null,
+	    collectionURL: null,
+	    image_points: { maxx: null, maxy: null, minx: null, miny: null },
+
+	    success: function(data, status, jqXHR) {
+//	        alert("data in success: " + data);
+	        try {
+//	            var stuff = jQuery.parseJSON(data);
+
+	            this.image_points.maxx = data.maxx;
+	            this.image_points.maxy = data.maxy;
+	            this.image_points.minx = data.minx;
+	            this.image_points.miny = data.miny;
+	        } catch(e) {
+	            alert(e);
+	        }
+
+
+		try {
+                    var bounds = new OpenLayers.Bounds(0, 
+		                                   this.image_points.miny, 
+						   this.image_points.maxx, 
+						   0);
+		} catch(e) {
+		    alert(e);
+		}
+
+
+//		alert("Bounds: " + bounds.toString());
+
+
+
+                var options = { controls: [], 
+		                maxExtent: bounds, 
+                                maxResolution: 32, 
+                                numZoomLevels: 6, 
+                                projection: "EPSG:404000", 
+                                units: "m"}
+
+                var map = new OpenLayers.Map("map", options);
+/*    
+                alert("In success, baseURL: " + this.baseURL); 
+                alert("In success, layers: " + this.layers); 
+
+                alert("In success, CQL: " + this.CQL); 
+                alert("In success, coda: " + this.coda);
+                alert("In success, collectionURL: " + this.collectionURL);
+    
+                alert("map.maxExtent.left: " + map.maxExtent.left);
+		alert("map.maxExtent.bottom: " + map.maxExtent.bottom);
+	        alert("image_points.maxx in success: " + this.image_points.maxx);
+
+	        alert("image_points.miny in success: " + this.image_points.miny);
+
+
+		alert("assigning to abs_miny");
+*/
+	        var abs_miny = this.image_points.miny;
+
+		try {
+
+
+//	            alert("abs_miny: " + abs_miny);
+
+		    if(abs_miny < 0) {
+//                        alert("abs_miny < 0"); 
+		        abs_miny = abs_miny * -1; 
+                    }
+		} catch(e) {
+		    console.log(e);
+		}
+
+
+		try {
+
+//		    map.updateSize(this.image_points.maxx/10, abs_miny/10);
+		    var mapDiv = jQuery("#map");
+		    mapDiv.width(this.image_points.maxx/10);
+		    mapDiv.height(abs_miny/10);
+		} catch(e) {
+		    console.log(e);
+                }
+
+		var image = null;
+
+		try {
+
+                    image = new OpenLayers.Layer.WMS("UCB:images - Tiled", this.baseURL, 
+		                                 {CQL_FILTER: this.CQL, 
+                                                  LAYERS: this.layers, 
+                                                  STYLES: "", 
+                                                  format: "image/jpeg", 
+                                                  palette: "safe", 
+                                                  tiled: true, 
+                                                  tilesOrigin : map.maxExtent.left + ", " + map.maxExtent.bottom}, 
+//                                                  version: "1.1.1", 
+  //                                                bbox: this.image_points.minx + ", " + this.image_points.miny + ", " + this.image_points.maxx + ", " + this.image_points.maxy, 
+//                                                  width: this.image_points.maxx, 
+//                                                  height: abs_miny, 
+//                                                  srs: "EPSG:404000"}, 
+                                                 {buffer: 0, 
+                                                  displayOutsideMaxExtent: true, 
+                                                  isBaseLayer: true } );
+		} catch(e) {
+		    alert(e);
+		}						  
+
+
+		try {
+//		    alert("After calling OpenLayers, image: " + image);
+                    var succ = map.addLayer(image);
+		    map.addControl(new OpenLayers.Control.PanZoom());
+		    map.addControl(new OpenLayers.Control.Navigation({documentDrag: true}));
+//		    alert("Zindexes?: " + map.Z_INDEX_BASE); 
+                    map.zoomToMaxExtent({ restricted: false });
+		    jQuery("#collection_url").attr("href", this.collectionURL);
+		    jQuery("#collection_url").text(this.collectionURL);
+		    map.render("map");
+		} catch(e) {
+		     console.log(e);
+		}
+            },
+
+
+            UGOLinit: function(layerState, layerId, index, loc, baseURL, layers, CQL, coda, collectionURL) {
+
+	        OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
+
+                // make OL compute scale according to WMS spec
+                OpenLayers.DOTS_PER_INCH = 25.4 / 0.28;
+
+//		alert("layers passed to UGOLinit: " + layers);
+
+		this.layerState = layerState;
+		this.layerId = layerId;
+		this.index = index;
+		this.baseURL = baseURL;
+		this.myLocation = loc;
+		this.layers = layers;
+		this.CQL = CQL;
+		this.coda = coda;
+		this.collectionURL = collectionURL;
+
+
+		var that = this;
+
+                /* Ajax call to gss for image size */
+                jQuery.ajax({
+		   url: that.gssURL + "?file_path=" + loc.imageCollection.path,
+		   data: null,
+		   context: that,
+		   success: that.success,
+		   datatype: "json"}
+                );
+
+	    }
+        }
+
+        jQuery(function() {
+
+//	          alert("Test message from unGeo: " + opener.org.OpenGeoPortal.unGeoreferenced.test());
+
+	    var vals = opener.org.OpenGeoPortal.unGeoreferenced.getValues();
+
+//	    alert("next calling UGOLinit");          
+
+//	    alert("in start, vals.baseURL: " + vals.baseURL);
+
+
+
+	    org.OpenGeoPortal.unGeoreferencedHelper.UGOLinit(
+	                   vals.layerState,
+	                   vals.layerId,
+			   vals.index,
+		           vals.location,
+			   vals.baseURL, 
+			   vals.layers, 
+			   vals.CQL,
+			   vals.coda,
+			   vals.collectionurl);
+//	          alert("after calling UGOLinit");
+
+	      });
+
+
+
+
+         </script>
+
+
+         <script type="text/javascript">
+             function shutdown() {
+//	         alert("in shutdown");
+                 opener.org.OpenGeoPortal.PreviewedLayers.removeLayer(org.OpenGeoPortal.unGeoreferencedHelper.layerId, 
+		                                                      org.OpenGeoPortal.unGeoreferencedHelper.index);
+		 try {
+		     org.OpenGeoPortal.unGeoreferencedHelper.layerState.setState(org.OpenGeoPortal.unGeoreferencedHelper.layerId, 
+		                                                                 {"preview": "off", "getFeature": false});
+		 } catch(e) {
+		     alert(e);
+		 }
+
+             }
+             window.onbeforeunload = shutdown;
+         </script>
+
+    </head>
+    <body>
+
+        <table>
+	    <tr id="maprow"><td><div id="map"></div></td></tr>
+	    <tr>
+	        <td>You are previewing an ungeoreferenced image, which cannot be displayed on the map.<br /> 
+		    Move the image into the center of the window before zooming.
+		</td>
+            </tr>
+	    <tr>
+	        <td>To see this image in its collection, see 
+		    <a id="collection_url" href=""></a>
+                </td>
+	    </tr>
+        </table>
+        <button onClick="window.close();">Shutdown</button>
+    </body>
+</html>
+
+
