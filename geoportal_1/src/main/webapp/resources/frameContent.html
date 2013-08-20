@@ -44,8 +44,6 @@
 	    success: function(data, status, jqXHR) {
 //	        alert("data in success: " + data);
 	        try {
-//	            var stuff = jQuery.parseJSON(data);
-
 	            this.image_points.maxx = data.maxx;
 	            this.image_points.maxy = data.maxy;
 	            this.image_points.minx = data.minx;
@@ -97,12 +95,7 @@
 	        var abs_miny = this.image_points.miny;
 
 		try {
-
-
-//	            alert("abs_miny: " + abs_miny);
-
 		    if(abs_miny < 0) {
-//                        alert("abs_miny < 0"); 
 		        abs_miny = abs_miny * -1; 
                     }
 		} catch(e) {
@@ -152,8 +145,12 @@
 		    map.addControl(new OpenLayers.Control.Navigation({documentDrag: true}));
 //		    alert("Zindexes?: " + map.Z_INDEX_BASE); 
                     map.zoomToMaxExtent({ restricted: false });
-		    jQuery("#collection_url").attr("href", this.collectionURL);
-		    jQuery("#collection_url").text(this.collectionURL);
+
+		    if(this.collectionURL != null) {
+		        jQuery("#collection").text('To see this image in its collection, see');
+			jQuery("#collURL").html('<a href="' + this.collectionURL + '" target="_blank">' + this.collectionURL + '</a>');
+
+                    }
 		    map.render("map");
 		} catch(e) {
 		     console.log(e);
@@ -197,15 +194,7 @@
 
         jQuery(function() {
 
-//	          alert("Test message from unGeo: " + opener.org.OpenGeoPortal.unGeoreferenced.test());
-
 	    var vals = opener.org.OpenGeoPortal.unGeoreferenced.getValues();
-
-//	    alert("next calling UGOLinit");          
-
-//	    alert("in start, vals.baseURL: " + vals.baseURL);
-
-
 
 	    org.OpenGeoPortal.unGeoreferencedHelper.UGOLinit(
 	                   vals.layerState,
@@ -217,7 +206,6 @@
 			   vals.CQL,
 			   vals.coda,
 			   vals.collectionurl);
-//	          alert("after calling UGOLinit");
 
 	      });
 
@@ -229,9 +217,6 @@
 
          <script type="text/javascript">
              function shutdown() {
-//	         alert("in shutdown");
-                 opener.org.OpenGeoPortal.PreviewedLayers.removeLayer(org.OpenGeoPortal.unGeoreferencedHelper.layerId, 
-		                                                      org.OpenGeoPortal.unGeoreferencedHelper.index);
 		 try {
 		     org.OpenGeoPortal.unGeoreferencedHelper.layerState.setState(org.OpenGeoPortal.unGeoreferencedHelper.layerId, 
 		                                                                 {"preview": "off", "getFeature": false});
@@ -239,8 +224,11 @@
 		     alert(e);
 		 }
 
+                 opener.org.OpenGeoPortal.PreviewedLayers.removeLayer(org.OpenGeoPortal.unGeoreferencedHelper.layerId, 
+		                                                      org.OpenGeoPortal.unGeoreferencedHelper.index);
+
              }
-             window.onbeforeunload = shutdown;
+             window.onunload = shutdown;
          </script>
 
     </head>
@@ -254,12 +242,12 @@
 		</td>
             </tr>
 	    <tr>
-	        <td>To see this image in its collection, see 
-		    <a id="collection_url" href=""></a>
+	        <td>	    
+		    <div id="collection"></div><span id="collURL"></span>
                 </td>
 	    </tr>
         </table>
-        <button onClick="window.close();">Shutdown</button>
+        <button onClick="shutdown();">Shutdown</button>
     </body>
 </html>
 

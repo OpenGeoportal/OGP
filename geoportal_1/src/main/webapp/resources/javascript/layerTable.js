@@ -1086,11 +1086,11 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 	       	try {
 	            //Get the data array for this row
 	            var aData = tableObj.fnGetData(tableElement[0]);
-		    console.log("Adata: " + aData);
+//		    console.log("Adata: " + aData);
 	            var index = this.tableHeadingsObj.getColumnIndex("LayerId");
-		    console.log("Index: " + index);
+//		    console.log("Index: " + index);
 	            var layerID = aData[index];
-		    console.log("layerID: " + layerID);
+//		    console.log("layerID: " + layerID);
 		    var location = null;
 	            //layer id is being used as the openlayers layer name
 	    	    try {
@@ -1100,20 +1100,18 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 			                                   aData[this.tableHeadingsObj.getColumnIndex("LayerDisplayName")] +'"');
             	    }
 
-            	    console.log("location: " + location);
-		    console.log("getLayersByName: " + org.OpenGeoPortal.map.getLayersByName(layerID)[0]);
+//            	    console.log("location: " + location);
+//		    console.log("getLayersByName: " + org.OpenGeoPortal.map.getLayersByName(layerID)[0]);
 	            if (org.OpenGeoPortal.map.getLayersByName(layerID)[0] || 
 			typeof location.wms != "undefined" || 
 			typeof location.ArcGISRest != "undefined"){
-			console.log("in if");
 	                org.OpenGeoPortal.map.hideLayer(layerID);
 		    } else {
 	                var availability = aData[this.tableHeadingsObj.getColumnIndex("Availability")];
 			if(availability.toLowerCase() == "offline"){
 			    org.OpenGeoPortal.map.hideLayerBBox();
-			    console.log("in availability if");
+
 			} else if(typeof location.imageCollection != "undefined") { 
-				console.log("in imageCollection if");
 			}
 		    }
 	            jQuery(thisObj).attr('title', showLayerText);
@@ -2480,7 +2478,8 @@ org.OpenGeoPortal.PreviewedLayers = {
     removeLayer: function(columnValue, columnIndex){
 	for (var layerIndex in this.layers){
 	    if (this.layers[layerIndex][columnIndex] == columnValue){
-		if(typeof this.layers[layerIndex].windowToClose != "undefined") {
+		if(typeof this.layers[layerIndex].windowToClose != "undefined" &&
+		   this.layers[layerIndex].windowToClose != null) {
 		    this.layers[layerIndex].windowToClose.close();
 		}
 		this.layers.splice(layerIndex, 1);
@@ -2492,7 +2491,8 @@ org.OpenGeoPortal.PreviewedLayers = {
 	var that = this;
 
 	for(var layerIndex in this.layers) {
-	    if(typeof this.layers[layerIndex].windowToClose != "undefined") {
+	    if(typeof this.layers[layerIndex].windowToClose != "undefined" &&
+	       this.layers[layerIndex].windowToClose != null) {
 		org.OpenGeoPortal.layerState.setState(that.layers[layerIndex][columnIndex], {"preview": "off", "getFeature": false});
 		this.layers[layerIndex].windowToClose.close();
 
