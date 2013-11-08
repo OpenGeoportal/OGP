@@ -2099,7 +2099,7 @@ org.OpenGeoPortal.UserInterface.prototype.logoutResponse = function(data, textSt
 };
 
 org.OpenGeoPortal.UserInterface.prototype.promptLogin = function(event){
-	//console.log("promptLogin");
+	console.log("promptLogin");
 	this.login.loginDialog();
 };
 

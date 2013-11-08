@@ -11,6 +11,8 @@ import javax.servlet.ServletResponse;
 
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,38 +23,60 @@ import org.slf4j.LoggerFactory;
 
 public class JsonpCallbackFilter implements Filter {
 
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
+    final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-		public void init(FilterConfig fConfig) throws ServletException {}
+    public void init(FilterConfig fConfig) throws ServletException {}
 
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-			HttpServletRequest httpRequest = (HttpServletRequest) request;
-			HttpServletResponse httpResponse = (HttpServletResponse) response;
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-			@SuppressWarnings("unchecked")
-			Map<String, String[]> parms = httpRequest.getParameterMap();
-			if(parms.containsKey("callback")) {
-				if(logger.isDebugEnabled())
-					logger.debug("Wrapping response with JSONP callback '" + parms.get("callback")[0] + "'");
+	System.out.println("In JsonpCallbackFilter");
 
-				OutputStream out = httpResponse.getOutputStream();
+	HttpServletRequest httpRequest = (HttpServletRequest) request;
+	HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-				GenericResponseWrapper wrapper = new GenericResponseWrapper(httpResponse);
+	@SuppressWarnings("unchecked")
+	Map<String, String[]> parms = httpRequest.getParameterMap();
 
-				chain.doFilter(request, wrapper);
+	System.out.println("In JsonpCallbackFilter, the size of pmap is: " + parms.size());
 
-				out.write(new String(parms.get("callback")[0] + "(").getBytes());
-				out.write(wrapper.getData());
-				out.write(new String(");").getBytes());
+	Set<String> keys = parms.keySet();
 
-				wrapper.setContentType("text/javascript;charset=UTF-8");
+	Iterator it = keys.iterator();
 
-				out.close();
-			} else {
-				chain.doFilter(request, response);
-			}
-		}
+	while(it.hasNext()) {
+	    String key = (String)it.next();
 
-		public void destroy() {}
+	    System.out.println("Params in JsonpCallbackFilter:\n");
+	    System.out.println("\tKey: " + key);
+	    String[] vals = parms.get(key);
+	    for(int i = 0;i < vals.length;i++) {
+		System.out.println("\t\tValue: " + vals[i] + "\n");
+	    }
+	} 
+
+	if(parms.containsKey("callback")) {
+	    //				if(logger.isDebugEnabled())
+	    //					logger.debug("Wrapping response with JSONP callback '" + parms.get("callback")[0] + "'");
+	    System.out.println("Wrapping response with JSONP callback '" + parms.get("callback")[0] + "'");
+
+	    OutputStream out = httpResponse.getOutputStream();
+
+	    GenericResponseWrapper wrapper = new GenericResponseWrapper(httpResponse);
+
+	    chain.doFilter(request, wrapper);
+
+	    out.write(new String(parms.get("callback")[0] + "(").getBytes());
+	    out.write(wrapper.getData());
+	    out.write(new String(");").getBytes());
+
+	    wrapper.setContentType("text/javascript;charset=UTF-8");
+
+	    out.close();
+	} else {
+	    chain.doFilter(request, response);
 	}
+    }
+
+    public void destroy() {}
+}
 

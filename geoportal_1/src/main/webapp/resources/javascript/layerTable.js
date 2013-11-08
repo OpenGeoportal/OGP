@@ -1292,7 +1292,8 @@ org.OpenGeoPortal.LayerTable = function(userDiv, tableName){
 		  var layerSource = rowObj.aData[this.tableHeadingsObj.getColumnIndex("Institution")];
 		  var imgText = "Login to " + layerSource + " to access this layer";
 		  //var previewControl = '<img class="button loginButton" onclick="org.OpenGeoPortal.ui.loginDialog()" src="' + imgSource + '" title="' + imgText + '" />';
-		  var previewControl = '<img class="button loginButton login" src="' + imgSource + '" title="' + imgText + '" />';
+		  var previewControl = '<img class="button loginButton login" src="' + 
+				       imgSource + '" title="' + imgText + '" />';
 		  return previewControl;
 	  };
 	  

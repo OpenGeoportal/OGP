@@ -24,12 +24,19 @@ if (typeof org.OpenGeoPortal == 'undefined'){
 org.OpenGeoPortal.LogIn = function(institution){
 	this.TYPE = org.OpenGeoPortal.InstitutionInfo.getLoginType(institution); //"iframe"; other choice is "form"; would be nice to get this from ogp config
 
+//	alert("this.TYPE in login.js: " + this.TYPE);
+
 	this.userNameLabel = institution + " Username:";
 	this.passwordLabel = institution + " Password:";
 	this.dialogTitle = "LOGIN";
 	
-	this.authenticationPage = org.OpenGeoPortal.InstitutionInfo.getAuthenticationPage(institution);;
+	this.authenticationPage = org.OpenGeoPortal.InstitutionInfo.getAuthenticationPage(institution);
+
 	this.ogpBase = window.location.protocol + "//" + window.location.host;
+
+//	alert("this.authPage in login.js: " + this.authenticationPage);
+//	alert("this.ogpBase in login.js: " + this.ogpBase);
+	
 	//this.responseObject = null;
 	// userId is null if no user is logged in
 	// when non-null, it is the id of the logged in user
@@ -146,7 +153,7 @@ this.getUrl = function(){
 	var hostname = window.location.hostname;
 	var currentPathname = window.location.pathname;
 	var pathParts = currentPathname.split("/");
-	var extraPath = "";
+	var extraPath = "newOGP/";
 	if (pathParts.length > 2)
 	{
 		// a hack to handle localhost where there is another element in the pathname
@@ -192,14 +199,17 @@ this.processFormLogin = function()
 	
 };
 	
+	
 this.processIframeLogin = function(){
 	var that = this;
-	jQuery.receiveMessage(
-			function(e) {
-				that.loginResponse(jQuery.parseJSON(e.data));
-				},
-			that.ogpBase);
+	var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+	var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+	jQuery(window).on(messageEvent, function(e) { that.loginResponse(
+		jQuery.parseJSON(e.originalEvent.data));
+	});
+	
 };
+
 
 //callback handler invoked with response to authenticate server call
 //sets the userId variable to hold the id of the logged in user
