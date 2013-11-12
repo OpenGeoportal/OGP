@@ -8,17 +8,8 @@
                     
     <beans:bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
 
-<!--
-        <beans:property name="service" value="https://localhost:8443/ROOT/j_spring_cas_security_check"/>
-
--->
-
         <beans:property name="service" value="https://linuxdev.lib.berkeley.edu:8443/newOGP/j_spring_cas_security_check"/>
 
-
-<!--        
-        <beans:property name="service" value="https://127.0.0.1:8443/newOGP/j_spring_cas_security_check"/>
--->        
         <beans:property name="sendRenew" value="false"/>
 
     </beans:bean>
@@ -59,10 +50,19 @@
         </beans:property>
         <beans:property name="key" value="an_id_for_this_auth_provider_only"/>
     </beans:bean>
+ 
 
+    <beans:bean id="UserDetailsService" class="org.OpenGeoPortal.Security.SimpleCasUserService">
+
+        <beans:property name="admins" value="175219" />
+    </beans:bean>
+
+
+ 
+<!--
     <beans:bean id="UserDetailsService" class="org.springframework.security.cas.userdetails.GrantedAuthorityFromAssertionAttributesUserDetailsService" />
 
-
+-->
      <!--
      <security:ldap-server url="${ldap.url}" />
      <security:authentication-manager alias="authenticationManager" >
