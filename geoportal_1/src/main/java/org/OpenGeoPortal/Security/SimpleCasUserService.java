@@ -49,7 +49,7 @@ public final class SimpleCasUserService implements UserDetailsService {
 
     private static final String NON_EXISTENT_PASSWORD_VALUE = "NO_PASSWORD";
 
-    private final String[] attributes;
+    private String[] attributes = null;
 
     private boolean convertToUpperCase = true;
     
@@ -62,6 +62,9 @@ public final class SimpleCasUserService implements UserDetailsService {
 	return ArrayUtils.contains(adminList, username);
     }
 	
+
+    public SimpleCasUserService() {}
+
     public SimpleCasUserService(final String[] attributes) {
         Assert.notNull(attributes, "attributes cannot be null.");//should null attributes be allowed, since we are not using CAS attributes for our roles?
        // Assert.isTrue(attributes.length > 0, "At least one attribute is required to retrieve roles from.");

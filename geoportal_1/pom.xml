@@ -217,13 +217,13 @@
 	    <artifactId>solr-solrj</artifactId>
 	    <version>4.0.0</version>
 	</dependency>
-<!--
-	    <dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-core</artifactId>
-		<version>${org.springframework.security.version}</version>
-	    </dependency>
--->
+
+        <dependency>
+	    <groupId>org.springframework.security</groupId>
+	    <artifactId>spring-security-core</artifactId>
+	    <version>${org.springframework.security.version}</version>
+	</dependency>
+
 	    <dependency>
 		<groupId>org.springframework.security</groupId>
 		<artifactId>spring-security-cas</artifactId>
