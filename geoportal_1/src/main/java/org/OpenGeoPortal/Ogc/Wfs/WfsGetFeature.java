@@ -1,6 +1,7 @@
 package org.OpenGeoPortal.Ogc.Wfs;
 
 import org.OpenGeoPortal.Download.Types.BoundingBox;
+import org.OpenGeoPortal.Utilities.OgpUtils;
 
 public class WfsGetFeature {
 	public static String createWfsGetFeatureRequest(String layerName, String workSpace, String nameSpace, String outputFormat, String filter) throws Exception {
@@ -29,13 +30,8 @@ public class WfsGetFeature {
 		//--generate POST message
 		//info needed: geometry column, bbox coords, epsg code, workspace & layername
 		
-		if (!workSpace.trim().isEmpty()){
-			layerName = workSpace + ":" + layerName;
-		} else {
-			if (layerName.contains(":")){
-				layerName = layerName.substring(layerName.indexOf(":"));
-			}
-		}
+		String layerNameNS = OgpUtils.getLayerNameNS(layerName, workSpace);
+		
 		String getFeatureRequest = "<wfs:GetFeature service=\"WFS\" version=\"1.0.0\""
 			+ " outputFormat=\"" + outputFormat + "\""
 			+ getAttributeString("maxfeatures", maxFeatures)
@@ -47,7 +43,7 @@ public class WfsGetFeature {
   			+ " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
   			+ " xsi:schemaLocation=\"http://www.opengis.net/wfs"
             + " http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">"
-  			+ "<wfs:Query typeName=\"" + layerName + "\">"
+  			+ "<wfs:Query typeName=\"" + layerNameNS + "\">"
   			+ filter
   			+ "</wfs:Query>"
 			+ "</wfs:GetFeature>";
