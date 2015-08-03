@@ -1,7 +1,7 @@
 OGP
 ===
 
-This is the active, community repository for the portal (including client JavaScript and server-side authentication and download Java code).
+Please use v2 of the portal at OGP2. This is the repository for version 1.2 of the portal (including client JavaScript and server-side authentication and download Java code).
 
 Installation
 ============
